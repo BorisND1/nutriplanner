@@ -4,15 +4,77 @@ import { MealSchedule as MealScheduleType } from "@/services/mealSchedule";
 
 interface MealScheduleProps {
   schedule: MealScheduleType[];
+  recommendations?: {
+    name: string;
+    category: string;
+    pricePerKg: number;
+    macros: {
+      caloriesPer100g: number;
+      proteinPer100g: number;
+      carbsPer100g: number;
+      fatsPer100g: number;
+    };
+    allergenes: string[];
+  }[];
 }
 
-export function MealSchedule({ schedule }: MealScheduleProps) {
+const distributeFoodByMeal = (recommendations: MealScheduleProps["recommendations"] = [], mealsCount: number) => {
+  if (!recommendations.length) return new Array(mealsCount).fill([]);
+
+  // Grouper les aliments par catégorie
+  const foodByCategory = recommendations.reduce((acc, food) => {
+    if (!acc[food.category]) {
+      acc[food.category] = [];
+    }
+    acc[food.category].push(food);
+    return acc;
+  }, {} as Record<string, typeof recommendations>);
+
+  // Distribution des aliments selon le type de repas
+  return Array.from({ length: mealsCount }, (_, index) => {
+    const mealFoods = [];
+
+    // Petit-déjeuner
+    if (index === 0) {
+      // Ajouter des céréales et produits laitiers pour le petit-déjeuner
+      if (foodByCategory["Céréales"]) {
+        mealFoods.push(...foodByCategory["Céréales"].slice(0, 1));
+      }
+      if (foodByCategory["Produits laitiers"]) {
+        mealFoods.push(...foodByCategory["Produits laitiers"].slice(0, 1));
+      }
+    }
+    // Déjeuner et dîner
+    else if (index === Math.floor(mealsCount / 2) || index === mealsCount - 1) {
+      // Ajouter des protéines et légumineuses
+      if (foodByCategory["Protéines"]) {
+        mealFoods.push(...foodByCategory["Protéines"].slice(0, 1));
+      }
+      if (foodByCategory["Légumineuses"]) {
+        mealFoods.push(...foodByCategory["Légumineuses"].slice(0, 1));
+      }
+    }
+    // Collations
+    else {
+      // Ajouter des fruits et oléagineux pour les collations
+      if (foodByCategory["Oléagineux"]) {
+        mealFoods.push(...foodByCategory["Oléagineux"].slice(0, 1));
+      }
+    }
+
+    return mealFoods;
+  });
+};
+
+export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
+  const foodByMeal = distributeFoodByMeal(recommendations, schedule.length);
+
   return (
     <Card className="w-full mt-6">
       <CardHeader>
         <CardTitle>Planning des repas</CardTitle>
         <CardDescription>
-          Horaires recommandés avec plages de flexibilité
+          Horaires recommandés avec plages de flexibilité et aliments suggérés
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -26,6 +88,23 @@ export function MealSchedule({ schedule }: MealScheduleProps) {
               <div className="text-sm text-muted-foreground">
                 Plage horaire flexible : {meal.flexibilityBefore} - {meal.flexibilityAfter}
               </div>
+              
+              {/* Affichage des aliments recommandés pour ce repas */}
+              {foodByMeal[index].length > 0 && (
+                <div className="mt-2 space-y-2">
+                  <h4 className="text-sm font-medium text-foreground">Aliments suggérés :</h4>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {foodByMeal[index].map((food, foodIndex) => (
+                      <div key={foodIndex} className="bg-background/50 p-2 rounded text-sm">
+                        <div className="font-medium">{food.name}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {food.macros.caloriesPer100g} kcal/100g · {food.macros.proteinPer100g}g protéines
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>

@@ -568,7 +568,10 @@ export function ProfileForm() {
 
         {/* Ajouter le composant MealSchedule après les résultats des macros */}
         {mealScheduleData && (
-          <MealSchedule schedule={mealScheduleData} />
+          <MealSchedule 
+            schedule={mealScheduleData} 
+            recommendations={form.watch("recommendations")}
+          />
         )}
 
         <Button type="submit" className="w-full">
