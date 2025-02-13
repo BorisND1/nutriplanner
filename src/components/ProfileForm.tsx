@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
+import { calculateDailyMacros, generateFoodRecommendations } from "@/services/foodRecommendations";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 const profileFormSchema = z.object({
   // Informations personnelles
@@ -79,11 +81,34 @@ export function ProfileForm() {
   });
 
   function onSubmit(data: ProfileFormValues) {
+    // Calculer les besoins en macronutriments
+    const macroTargets = calculateDailyMacros(
+      data.weight,
+      data.height,
+      data.age,
+      data.activityLevel,
+      data.goal
+    );
+
+    // Générer les recommandations alimentaires
+    const { recommendations, alternativesIfNeeded } = generateFoodRecommendations(
+      macroTargets,
+      data.allergies,
+      data.monthlyBudget
+    );
+
     toast({
-      title: "Profil mis à jour",
-      description: "Votre programme alimentaire est en cours de génération...",
+      title: "Programme généré avec succès !",
+      description: "Voici vos besoins quotidiens en macronutriments :",
+      duration: 5000,
     });
-    console.log(data);
+
+    // Afficher les résultats dans la console pour le développement
+    console.log({
+      macroTargets,
+      recommendations,
+      alternativesIfNeeded
+    });
   }
 
   return (
@@ -364,6 +389,37 @@ export function ProfileForm() {
               </FormItem>
             )}
           />
+        </div>
+
+        <div className="mt-8 space-y-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Besoins journaliers</CardTitle>
+              <CardDescription>
+                Ces valeurs seront calculées en fonction de vos objectifs
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div className="p-4 bg-secondary/20 rounded-lg text-center">
+                  <div className="text-sm font-medium text-muted-foreground">Calories</div>
+                  <div className="text-2xl font-bold text-primary">--</div>
+                </div>
+                <div className="p-4 bg-secondary/20 rounded-lg text-center">
+                  <div className="text-sm font-medium text-muted-foreground">Protéines</div>
+                  <div className="text-2xl font-bold text-primary">--</div>
+                </div>
+                <div className="p-4 bg-secondary/20 rounded-lg text-center">
+                  <div className="text-sm font-medium text-muted-foreground">Glucides</div>
+                  <div className="text-2xl font-bold text-primary">--</div>
+                </div>
+                <div className="p-4 bg-secondary/20 rounded-lg text-center">
+                  <div className="text-sm font-medium text-muted-foreground">Lipides</div>
+                  <div className="text-2xl font-bold text-primary">--</div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         <Button type="submit" className="w-full">
