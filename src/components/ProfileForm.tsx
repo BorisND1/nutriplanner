@@ -1,4 +1,3 @@
-
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -10,6 +9,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -35,6 +35,7 @@ const profileFormSchema = z.object({
   
   // Allergies (multiple selection possible)
   allergies: z.array(z.string()).default([]),
+  otherAllergies: z.string().optional(),
   
   // Budget
   monthlyBudget: z.string().min(1, "Le budget est requis").transform(Number),
@@ -52,7 +53,23 @@ const defaultValues: Partial<ProfileFormValues> = {
   goal: "perte_poids",
   mealsPerDay: "4",
   allergies: [],
+  otherAllergies: "",
 };
+
+const allergiesList = [
+  { value: "gluten", label: "Gluten", description: "Alternatives : riz, quinoa, sarrasin" },
+  { value: "lactose", label: "Lactose", description: "Alternatives : lait d'amande, soja, avoine" },
+  { value: "arachides", label: "Arachides", description: "Alternatives : graines de tournesol, citrouille" },
+  { value: "fruits_a_coque", label: "Fruits à coque", description: "Alternatives : graines, légumineuses" },
+  { value: "oeufs", label: "Œufs", description: "Alternatives : tofu, légumineuses" },
+  { value: "poisson", label: "Poisson", description: "Alternatives : algues, graines de chia (oméga-3)" },
+  { value: "crustaces", label: "Crustacés", description: "Alternatives : légumineuses, tofu" },
+  { value: "soja", label: "Soja", description: "Alternatives : pois chiches, lentilles" },
+  { value: "sesame", label: "Sésame", description: "Alternatives : graines de lin, chia" },
+  { value: "sulfites", label: "Sulfites", description: "Présents dans certains vins et fruits secs" },
+  { value: "celeri", label: "Céleri", description: "Alternatives : fenouil, persil" },
+  { value: "moutarde", label: "Moutarde", description: "Alternatives : curcuma, gingembre" }
+];
 
 export function ProfileForm() {
   const { toast } = useToast();
@@ -200,8 +217,15 @@ export function ProfileForm() {
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Allergies alimentaires</FormLabel>
+                <FormDescription>
+                  Sélectionnez vos allergies ou intolérances. Nous adapterons votre programme en conséquence.
+                </FormDescription>
                 <Select
-                  onValueChange={(value) => field.onChange([...field.value, value])}
+                  onValueChange={(value) => {
+                    if (!field.value.includes(value)) {
+                      field.onChange([...field.value, value]);
+                    }
+                  }}
                   value={field.value[field.value.length - 1]}
                 >
                   <FormControl>
@@ -210,37 +234,60 @@ export function ProfileForm() {
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="gluten">Gluten</SelectItem>
-                    <SelectItem value="lactose">Lactose</SelectItem>
-                    <SelectItem value="arachides">Arachides</SelectItem>
-                    <SelectItem value="fruits_a_coque">Fruits à coque</SelectItem>
-                    <SelectItem value="oeufs">Œufs</SelectItem>
-                    <SelectItem value="poisson">Poisson</SelectItem>
-                    <SelectItem value="crustaces">Crustacés</SelectItem>
-                    <SelectItem value="soja">Soja</SelectItem>
+                    {allergiesList.map((allergie) => (
+                      <SelectItem key={allergie.value} value={allergie.value}>
+                        <div className="flex flex-col">
+                          <span>{allergie.label}</span>
+                          <span className="text-xs text-muted-foreground">{allergie.description}</span>
+                        </div>
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
                 <div className="flex flex-wrap gap-2 mt-2">
-                  {field.value.map((allergie, index) => (
-                    <div
-                      key={index}
-                      className="bg-secondary px-3 py-1 rounded-full text-sm flex items-center gap-2"
-                    >
-                      {allergie}
-                      <button
-                        type="button"
-                        onClick={() => {
-                          const newAllergies = [...field.value];
-                          newAllergies.splice(index, 1);
-                          field.onChange(newAllergies);
-                        }}
-                        className="text-foreground/60 hover:text-foreground"
+                  {field.value.map((allergie, index) => {
+                    const allergieInfo = allergiesList.find(a => a.value === allergie);
+                    return (
+                      <div
+                        key={index}
+                        className="bg-secondary px-3 py-1 rounded-full text-sm flex items-center gap-2 group relative"
                       >
-                        ×
-                      </button>
-                    </div>
-                  ))}
+                        {allergieInfo?.label || allergie}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const newAllergies = [...field.value];
+                            newAllergies.splice(index, 1);
+                            field.onChange(newAllergies);
+                          }}
+                          className="text-foreground/60 hover:text-foreground"
+                        >
+                          ×
+                        </button>
+                        <div className="absolute bottom-full left-0 mb-2 w-48 p-2 bg-popover text-popover-foreground text-xs rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                          {allergieInfo?.description}
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="otherAllergies"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Autres allergies ou intolérances</FormLabel>
+                <FormDescription>
+                  Si vous avez d'autres allergies non listées, précisez-les ici
+                </FormDescription>
+                <FormControl>
+                  <Input {...field} placeholder="Ex: kiwi, fruits de mer..." />
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
