@@ -99,16 +99,20 @@ export function ProfileForm() {
 
     toast({
       title: "Programme généré avec succès !",
-      description: "Voici vos besoins quotidiens en macronutriments :",
+      description: (
+        <div className="mt-2">
+          <p>Calories : {macroTargets.calories} kcal</p>
+          <p>Protéines : {macroTargets.protein}g</p>
+          <p>Glucides : {macroTargets.carbs}g</p>
+          <p>Lipides : {macroTargets.fats}g</p>
+        </div>
+      ),
       duration: 5000,
     });
 
-    // Afficher les résultats dans la console pour le développement
-    console.log({
-      macroTargets,
-      recommendations,
-      alternativesIfNeeded
-    });
+    form.setValue("macroTargets", macroTargets);
+    form.setValue("recommendations", recommendations);
+    form.setValue("alternatives", alternativesIfNeeded);
   }
 
   return (
@@ -403,23 +407,93 @@ export function ProfileForm() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="p-4 bg-secondary/20 rounded-lg text-center">
                   <div className="text-sm font-medium text-muted-foreground">Calories</div>
-                  <div className="text-2xl font-bold text-primary">--</div>
+                  <div className="text-2xl font-bold text-primary">
+                    {form.watch("macroTargets")?.calories || "--"}
+                  </div>
                 </div>
                 <div className="p-4 bg-secondary/20 rounded-lg text-center">
                   <div className="text-sm font-medium text-muted-foreground">Protéines</div>
-                  <div className="text-2xl font-bold text-primary">--</div>
+                  <div className="text-2xl font-bold text-primary">
+                    {form.watch("macroTargets")?.protein || "--"}g
+                  </div>
                 </div>
                 <div className="p-4 bg-secondary/20 rounded-lg text-center">
                   <div className="text-sm font-medium text-muted-foreground">Glucides</div>
-                  <div className="text-2xl font-bold text-primary">--</div>
+                  <div className="text-2xl font-bold text-primary">
+                    {form.watch("macroTargets")?.carbs || "--"}g
+                  </div>
                 </div>
                 <div className="p-4 bg-secondary/20 rounded-lg text-center">
                   <div className="text-sm font-medium text-muted-foreground">Lipides</div>
-                  <div className="text-2xl font-bold text-primary">--</div>
+                  <div className="text-2xl font-bold text-primary">
+                    {form.watch("macroTargets")?.fats || "--"}g
+                  </div>
                 </div>
               </div>
             </CardContent>
           </Card>
+
+          {form.watch("recommendations") && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Aliments recommandés</CardTitle>
+                <CardDescription>
+                  Sélection optimisée selon vos besoins et contraintes
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  {["Protéines", "Céréales", "Légumineuses", "Matières grasses"].map(category => {
+                    const categoryFoods = form.watch("recommendations")?.filter(food => food.category === category);
+                    if (!categoryFoods?.length) return null;
+                    
+                    return (
+                      <div key={category} className="space-y-2">
+                        <h3 className="font-semibold text-foreground">{category}</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {categoryFoods.map((food, index) => (
+                            <div key={index} className="bg-secondary/10 p-4 rounded-lg">
+                              <div className="font-medium">{food.name}</div>
+                              <div className="text-sm text-muted-foreground mt-1">
+                                <div>Calories : {food.macros.caloriesPer100g} kcal/100g</div>
+                                <div>Protéines : {food.macros.proteinPer100g}g/100g</div>
+                                <div>Prix : {food.pricePerKg}€/kg</div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {form.watch("alternatives") && form.watch("alternatives").length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle>Alternatives économiques</CardTitle>
+                <CardDescription>
+                  Options plus abordables pour votre budget
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {form.watch("alternatives").map((food, index) => (
+                    <div key={index} className="bg-secondary/10 p-4 rounded-lg">
+                      <div className="font-medium">{food.name}</div>
+                      <div className="text-sm text-muted-foreground mt-1">
+                        <div>Calories : {food.macros.caloriesPer100g} kcal/100g</div>
+                        <div>Protéines : {food.macros.proteinPer100g}g/100g</div>
+                        <div>Prix : {food.pricePerKg}€/kg</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
         </div>
 
         <Button type="submit" className="w-full">

@@ -1,4 +1,3 @@
-
 interface MacroTargets {
   calories: number;
   protein: number;
@@ -19,7 +18,6 @@ interface FoodItem {
   allergenes: string[];
 }
 
-// Base de données simplifiée des aliments
 const foodDatabase: FoodItem[] = [
   {
     name: "Poulet (blanc)",
@@ -34,6 +32,66 @@ const foodDatabase: FoodItem[] = [
     allergenes: []
   },
   {
+    name: "Bœuf (steak haché 5%)",
+    category: "Protéines",
+    pricePerKg: 12,
+    macros: {
+      caloriesPer100g: 140,
+      proteinPer100g: 27,
+      carbsPer100g: 0,
+      fatsPer100g: 5
+    },
+    allergenes: []
+  },
+  {
+    name: "Saumon",
+    category: "Protéines",
+    pricePerKg: 20,
+    macros: {
+      caloriesPer100g: 208,
+      proteinPer100g: 22,
+      carbsPer100g: 0,
+      fatsPer100g: 13
+    },
+    allergenes: ["poisson"]
+  },
+  {
+    name: "Thon en conserve",
+    category: "Protéines",
+    pricePerKg: 15,
+    macros: {
+      caloriesPer100g: 116,
+      proteinPer100g: 26,
+      carbsPer100g: 0,
+      fatsPer100g: 1
+    },
+    allergenes: ["poisson"]
+  },
+  {
+    name: "Œufs",
+    category: "Protéines",
+    pricePerKg: 6,
+    macros: {
+      caloriesPer100g: 155,
+      proteinPer100g: 13,
+      carbsPer100g: 1.1,
+      fatsPer100g: 11
+    },
+    allergenes: ["oeufs"]
+  },
+  {
+    name: "Tofu",
+    category: "Protéines",
+    pricePerKg: 8,
+    macros: {
+      caloriesPer100g: 76,
+      proteinPer100g: 8,
+      carbsPer100g: 1.9,
+      fatsPer100g: 4.8
+    },
+    allergenes: ["soja"]
+  },
+  {
     name: "Quinoa",
     category: "Céréales",
     pricePerKg: 6,
@@ -42,6 +100,54 @@ const foodDatabase: FoodItem[] = [
       proteinPer100g: 4.4,
       carbsPer100g: 21.3,
       fatsPer100g: 1.9
+    },
+    allergenes: []
+  },
+  {
+    name: "Riz brun",
+    category: "Céréales",
+    pricePerKg: 3,
+    macros: {
+      caloriesPer100g: 111,
+      proteinPer100g: 2.6,
+      carbsPer100g: 23,
+      fatsPer100g: 0.9
+    },
+    allergenes: []
+  },
+  {
+    name: "Avoine",
+    category: "Céréales",
+    pricePerKg: 2.5,
+    macros: {
+      caloriesPer100g: 389,
+      proteinPer100g: 16.9,
+      carbsPer100g: 66.3,
+      fatsPer100g: 6.9
+    },
+    allergenes: []
+  },
+  {
+    name: "Pain complet",
+    category: "Céréales",
+    pricePerKg: 4,
+    macros: {
+      caloriesPer100g: 247,
+      proteinPer100g: 13,
+      carbsPer100g: 41,
+      fatsPer100g: 3.3
+    },
+    allergenes: ["gluten"]
+  },
+  {
+    name: "Patate douce",
+    category: "Féculents",
+    pricePerKg: 2.5,
+    macros: {
+      caloriesPer100g: 86,
+      proteinPer100g: 1.6,
+      carbsPer100g: 20.1,
+      fatsPer100g: 0.1
     },
     allergenes: []
   },
@@ -57,7 +163,78 @@ const foodDatabase: FoodItem[] = [
     },
     allergenes: ["lactose"]
   },
-  // ... Ajoutez plus d'aliments selon vos besoins
+  {
+    name: "Fromage blanc 0%",
+    category: "Produits laitiers",
+    pricePerKg: 3.5,
+    macros: {
+      caloriesPer100g: 71,
+      proteinPer100g: 12,
+      carbsPer100g: 4,
+      fatsPer100g: 0.2
+    },
+    allergenes: ["lactose"]
+  },
+  {
+    name: "Amandes",
+    category: "Oléagineux",
+    pricePerKg: 15,
+    macros: {
+      caloriesPer100g: 579,
+      proteinPer100g: 21,
+      carbsPer100g: 22,
+      fatsPer100g: 49
+    },
+    allergenes: ["fruits_a_coque"]
+  },
+  {
+    name: "Graines de chia",
+    category: "Oléagineux",
+    pricePerKg: 18,
+    macros: {
+      caloriesPer100g: 486,
+      proteinPer100g: 17,
+      carbsPer100g: 42,
+      fatsPer100g: 31
+    },
+    allergenes: []
+  },
+  {
+    name: "Lentilles",
+    category: "Légumineuses",
+    pricePerKg: 3,
+    macros: {
+      caloriesPer100g: 116,
+      proteinPer100g: 9,
+      carbsPer100g: 20,
+      fatsPer100g: 0.4
+    },
+    allergenes: []
+  },
+  {
+    name: "Pois chiches",
+    category: "Légumineuses",
+    pricePerKg: 2.5,
+    macros: {
+      caloriesPer100g: 364,
+      proteinPer100g: 19,
+      carbsPer100g: 61,
+      fatsPer100g: 6
+    },
+    allergenes: []
+  },
+  {
+    name: "Huile d'olive",
+    category: "Matières grasses",
+    pricePerKg: 10,
+    macros: {
+      caloriesPer100g: 884,
+      proteinPer100g: 0,
+      carbsPer100g: 0,
+      fatsPer100g: 100
+    },
+    allergenes: []
+  }
 ];
 
 export const calculateDailyMacros = (
