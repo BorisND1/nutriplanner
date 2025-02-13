@@ -3,6 +3,7 @@ import React from 'react';
 import { Calendar, User, Bell, ListChecks } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
+import { ProfileForm } from '@/components/ProfileForm';
 
 const Index = () => {
   return (
@@ -13,7 +14,7 @@ const Index = () => {
             <div className="flex-shrink-0 text-primary font-semibold">FoodPlanner</div>
             <div className="hidden md:flex space-x-8">
               <a href="#features" className="text-foreground/80 hover:text-foreground transition-colors">Fonctionnalités</a>
-              <a href="#planner" className="text-foreground/80 hover:text-foreground transition-colors">Planificateur</a>
+              <a href="#form" className="text-foreground/80 hover:text-foreground transition-colors">Programme</a>
               <a href="#profile" className="text-foreground/80 hover:text-foreground transition-colors">Profil</a>
             </div>
             <Button variant="default" className="bg-primary hover:bg-primary/90 transition-colors">
@@ -99,6 +100,20 @@ const Index = () => {
                 <p className="text-muted-foreground">Générez automatiquement vos listes d'ingrédients.</p>
               </motion.div>
             </div>
+          </div>
+        </section>
+
+        <section id="form" className="py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">
+                Créez votre programme personnalisé
+              </h2>
+              <p className="text-lg text-muted-foreground">
+                Remplissez le formulaire ci-dessous pour obtenir un programme adapté à vos besoins
+              </p>
+            </div>
+            <ProfileForm />
           </div>
         </section>
       </main>
