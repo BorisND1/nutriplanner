@@ -25,27 +25,68 @@ import { useToast } from "@/components/ui/use-toast";
 import { calculateDailyMacros, generateFoodRecommendations } from "@/services/foodRecommendations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
+interface MacroTargets {
+  calories: number;
+  protein: number;
+  carbs: number;
+  fats: number;
+}
+
+interface FoodItem {
+  name: string;
+  category: string;
+  pricePerKg: number;
+  macros: {
+    caloriesPer100g: number;
+    proteinPer100g: number;
+    carbsPer100g: number;
+    fatsPer100g: number;
+  };
+  allergenes: string[];
+}
+
 const profileFormSchema = z.object({
-  // Informations personnelles
   age: z.string().min(1, "L'âge est requis").transform(Number),
   weight: z.string().min(1, "Le poids est requis").transform(Number),
   height: z.string().min(1, "La taille est requise").transform(Number),
   activityLevel: z.enum(["sedentaire", "leger", "modere", "actif", "tres_actif"]),
-  
-  // Objectif physique
   goal: z.enum(["prise_masse", "perte_poids", "seche"]),
-  
-  // Allergies (multiple selection possible)
   allergies: z.array(z.string()).default([]),
   otherAllergies: z.string().optional(),
-  
-  // Budget
   monthlyBudget: z.string().min(1, "Le budget est requis").transform(Number),
-  
-  // Créneaux horaires
   wakeUpTime: z.string().min(1, "L'heure de réveil est requise"),
   bedTime: z.string().min(1, "L'heure de coucher est requise"),
   mealsPerDay: z.enum(["3", "4", "5", "6"]),
+  macroTargets: z.object({
+    calories: z.number(),
+    protein: z.number(),
+    carbs: z.number(),
+    fats: z.number(),
+  }).optional(),
+  recommendations: z.array(z.object({
+    name: z.string(),
+    category: z.string(),
+    pricePerKg: z.number(),
+    macros: z.object({
+      caloriesPer100g: z.number(),
+      proteinPer100g: z.number(),
+      carbsPer100g: z.number(),
+      fatsPer100g: z.number(),
+    }),
+    allergenes: z.array(z.string()),
+  })).optional(),
+  alternatives: z.array(z.object({
+    name: z.string(),
+    category: z.string(),
+    pricePerKg: z.number(),
+    macros: z.object({
+      caloriesPer100g: z.number(),
+      proteinPer100g: z.number(),
+      carbsPer100g: z.number(),
+      fatsPer100g: z.number(),
+    }),
+    allergenes: z.array(z.string()),
+  })).optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -331,6 +372,9 @@ export function ProfileForm() {
                 <FormControl>
                   <Input type="number" min="100" {...field} />
                 </FormControl>
+                <FormDescription>
+                  Indiquez votre budget mensuel pour l'alimentation. Nous adapterons les recommandations en conséquence.
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
