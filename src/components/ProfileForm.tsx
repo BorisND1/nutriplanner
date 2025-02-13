@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -567,10 +566,10 @@ export function ProfileForm() {
         </div>
 
         {/* Ajouter le composant MealSchedule après les résultats des macros */}
-        {mealScheduleData && (
+        {mealScheduleData && form.watch("recommendations") && (
           <MealSchedule 
             schedule={mealScheduleData} 
-            recommendations={form.watch("recommendations")}
+            recommendations={form.watch("recommendations") as FoodItem[]}
           />
         )}
 
