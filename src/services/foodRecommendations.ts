@@ -1,4 +1,3 @@
-
 interface MacroTargets {
   calories: number;
   protein: number;
@@ -349,7 +348,7 @@ export const generateCustomFoodList = async (
   macroTargets: MacroTargets
 ): Promise<FoodItem[]> => {
   try {
-    const response = await fetch("/api/generate-food-list", {
+    const response = await fetch("https://bfdoobecenjnuelpcjou.supabase.co/functions/v1/generate-food-list", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
