@@ -152,7 +152,7 @@ export function ProfileForm() {
     );
 
     // Mise à jour automatique du nombre de repas recommandé
-    form.setValue("mealsPerDay", String(result.recommendedMeals));
+    form.setValue("mealsPerDay", result.recommendedMeals);
 
     // Afficher les résultats
     toast({
