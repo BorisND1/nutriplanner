@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
-import { calculateDailyMacros, generateFoodRecommendations } from "@/services/foodRecommendations";
+import { calculateDailyMacros, generateFoodRecommendations, generateCustomFoodList } from "@/services/foodRecommendations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface MacroTargets {
@@ -121,8 +121,7 @@ export function ProfileForm() {
     defaultValues,
   });
 
-  function onSubmit(data: ProfileFormValues) {
-    // Calculer les besoins en macronutriments
+  async function onSubmit(data: ProfileFormValues) {
     const macroTargets = calculateDailyMacros(
       data.weight,
       data.height,
@@ -131,15 +130,16 @@ export function ProfileForm() {
       data.goal
     );
 
-    // Générer les recommandations alimentaires
+    // On utilise d'abord les recommandations statiques comme fallback
     const { recommendations, alternativesIfNeeded } = generateFoodRecommendations(
       macroTargets,
       data.allergies,
       data.monthlyBudget
     );
 
+    // Afficher d'abord les résultats de base
     toast({
-      title: "Programme généré avec succès !",
+      title: "Programme en cours de génération...",
       description: (
         <div className="mt-2">
           <p>Calories : {macroTargets.calories} kcal</p>
@@ -154,6 +154,35 @@ export function ProfileForm() {
     form.setValue("macroTargets", macroTargets);
     form.setValue("recommendations", recommendations);
     form.setValue("alternatives", alternativesIfNeeded);
+
+    try {
+      // Générer une liste personnalisée avec l'IA
+      const customFoodList = await generateCustomFoodList(
+        data.age,
+        data.weight,
+        data.height,
+        data.activityLevel,
+        data.goal,
+        data.allergies,
+        data.monthlyBudget,
+        macroTargets
+      );
+
+      // Mettre à jour les recommandations avec la liste générée par l'IA
+      form.setValue("recommendations", customFoodList);
+      toast({
+        title: "Liste d'aliments personnalisée générée !",
+        description: "Vos recommandations ont été mises à jour avec des suggestions sur mesure.",
+        duration: 3000,
+      });
+    } catch (error) {
+      console.error('Erreur lors de la génération de la liste personnalisée:', error);
+      toast({
+        title: "Information",
+        description: "Utilisation des recommandations standards (la personnalisation n'a pas pu être générée)",
+        duration: 3000,
+      });
+    }
   }
 
   return (

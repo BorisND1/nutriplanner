@@ -336,3 +336,44 @@ export const generateFoodRecommendations = (
     alternativesIfNeeded
   };
 };
+
+export const generateCustomFoodList = async (
+  age: number,
+  weight: number,
+  height: number,
+  activityLevel: string,
+  goal: string,
+  allergies: string[],
+  budget: number,
+  macroTargets: MacroTargets
+): Promise<FoodItem[]> => {
+  try {
+    const response = await fetch('/api/generate-food-list', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        age,
+        weight,
+        height,
+        activityLevel,
+        goal,
+        allergies,
+        budget,
+        macroTargets
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Erreur lors de la génération de la liste d'aliments');
+    }
+
+    const data = await response.json();
+    return data.foodList;
+  } catch (error) {
+    console.error('Erreur lors de la génération de la liste d'aliments:', error);
+    // En cas d'erreur, on retourne la liste statique
+    return generateFoodRecommendations(macroTargets, allergies, budget).recommendations;
+  }
+};
