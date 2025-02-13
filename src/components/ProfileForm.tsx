@@ -174,7 +174,7 @@ export function ProfileForm() {
     form.setValue("macroTargets", macroTargets);
     form.setValue("recommendations", result.foodList);
     form.setValue("alternatives", alternativesIfNeeded);
-    
+  }
 
   return (
     <Form {...form}>
