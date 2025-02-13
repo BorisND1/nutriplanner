@@ -393,6 +393,9 @@ const convertTimeToMinutes = (time: string): number => {
   return hours * 60 + minutes;
 };
 
+import { supabase } from "@/integrations/supabase/client";
+import { generateMealSchedule, MealSchedule } from "./mealSchedule";
+
 export const generateCustomFoodList = async (
   age: number,
   weight: number,

@@ -25,6 +25,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { calculateDailyMacros, generateFoodRecommendations, generateCustomFoodList } from "@/services/foodRecommendations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MealSchedule } from "./MealSchedule";
+import type { MealSchedule as MealScheduleType } from "@/services/mealSchedule";
 
 interface MacroTargets {
   calories: number;
@@ -117,6 +118,7 @@ const allergiesList = [
 
 export function ProfileForm() {
   const { toast } = useToast();
+  const [mealScheduleData, setMealScheduleData] = useState<MealScheduleType[] | null>(null);
   const form = useForm<ProfileFormValues>({
     resolver: zodResolver(profileFormSchema),
     defaultValues,
@@ -174,6 +176,9 @@ export function ProfileForm() {
     form.setValue("macroTargets", macroTargets);
     form.setValue("recommendations", result.foodList);
     form.setValue("alternatives", alternativesIfNeeded);
+    
+    // Mettre à jour le planning des repas
+    setMealScheduleData(result.mealSchedule);
   }
 
   return (
@@ -561,8 +566,8 @@ export function ProfileForm() {
         </div>
 
         {/* Ajouter le composant MealSchedule après les résultats des macros */}
-        {result?.mealSchedule && (
-          <MealSchedule schedule={result.mealSchedule} />
+        {mealScheduleData && (
+          <MealSchedule schedule={mealScheduleData} />
         )}
 
         <Button type="submit" className="w-full">
