@@ -407,6 +407,7 @@ export const generateCustomFoodList = async (
 ): Promise<{
   foodList: FoodItem[];
   recommendedMeals: "3" | "4" | "5" | "6";
+  mealSchedule: MealSchedule[];
 }> => {
   try {
     const { data, error } = await supabase.functions.invoke('generate-food-list', {
@@ -430,18 +431,37 @@ export const generateCustomFoodList = async (
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
 
+    // Générer le planning des repas
+    const mealSchedule = generateMealSchedule(
+      wakeUpTime,
+      bedTime,
+      goal,
+      recommendedMealsNumber
+    );
+
     return {
       foodList: data.foodList,
-      recommendedMeals
+      recommendedMeals,
+      mealSchedule
     };
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
     // En cas d'erreur, on retourne la liste statique et un nombre de repas calculé
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
+    
+    // Générer le planning des repas même en cas d'erreur
+    const mealSchedule = generateMealSchedule(
+      wakeUpTime,
+      bedTime,
+      goal,
+      recommendedMealsNumber
+    );
+
     return {
       foodList: generateFoodRecommendations(macroTargets, allergies, budget).recommendations,
-      recommendedMeals
+      recommendedMeals,
+      mealSchedule
     };
   }
 };

@@ -24,6 +24,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useToast } from "@/components/ui/use-toast";
 import { calculateDailyMacros, generateFoodRecommendations, generateCustomFoodList } from "@/services/foodRecommendations";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { MealSchedule } from "./MealSchedule";
 
 interface MacroTargets {
   calories: number;
@@ -137,7 +138,7 @@ export function ProfileForm() {
       data.monthlyBudget
     );
 
-    // Générer le nombre de repas recommandé
+    // Générer le nombre de repas recommandé et le planning
     const result = await generateCustomFoodList(
       data.age,
       data.weight,
@@ -173,7 +174,7 @@ export function ProfileForm() {
     form.setValue("macroTargets", macroTargets);
     form.setValue("recommendations", result.foodList);
     form.setValue("alternatives", alternativesIfNeeded);
-  }
+    
 
   return (
     <Form {...form}>
@@ -558,6 +559,11 @@ export function ProfileForm() {
             </Card>
           )}
         </div>
+
+        {/* Ajouter le composant MealSchedule après les résultats des macros */}
+        {result?.mealSchedule && (
+          <MealSchedule schedule={result.mealSchedule} />
+        )}
 
         <Button type="submit" className="w-full">
           Générer mon programme
