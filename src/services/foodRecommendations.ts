@@ -406,7 +406,7 @@ export const generateCustomFoodList = async (
   bedTime: string
 ): Promise<{
   foodList: FoodItem[];
-  recommendedMeals: number;
+  recommendedMeals: "3" | "4" | "5" | "6";
 }> => {
   try {
     const response = await fetch("https://bfdoobecenjnuelpcjou.supabase.co/functions/v1/generate-food-list", {
@@ -431,7 +431,8 @@ export const generateCustomFoodList = async (
     }
 
     const data = await response.json();
-    const recommendedMeals = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
+    const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
+    const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
 
     return {
       foodList: data.foodList,
@@ -440,7 +441,8 @@ export const generateCustomFoodList = async (
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
     // En cas d'erreur, on retourne la liste statique et un nombre de repas calculé
-    const recommendedMeals = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
+    const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
+    const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
     return {
       foodList: generateFoodRecommendations(macroTargets, allergies, budget).recommendations,
       recommendedMeals
