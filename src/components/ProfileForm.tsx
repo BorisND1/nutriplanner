@@ -137,52 +137,42 @@ export function ProfileForm() {
       data.monthlyBudget
     );
 
-    // Afficher d'abord les résultats de base
+    // Générer le nombre de repas recommandé
+    const result = await generateCustomFoodList(
+      data.age,
+      data.weight,
+      data.height,
+      data.activityLevel,
+      data.goal,
+      data.allergies,
+      data.monthlyBudget,
+      macroTargets,
+      data.wakeUpTime,
+      data.bedTime
+    );
+
+    // Mise à jour automatique du nombre de repas recommandé
+    form.setValue("mealsPerDay", String(result.recommendedMeals));
+
+    // Afficher les résultats
     toast({
-      title: "Programme en cours de génération...",
+      title: "Programme généré avec succès",
       description: (
         <div className="mt-2">
           <p>Calories : {macroTargets.calories} kcal</p>
           <p>Protéines : {macroTargets.protein}g</p>
           <p>Glucides : {macroTargets.carbs}g</p>
           <p>Lipides : {macroTargets.fats}g</p>
+          <p className="mt-2 font-medium">Nombre de repas recommandé : {result.recommendedMeals}</p>
         </div>
       ),
       duration: 5000,
     });
 
+    // Mettre à jour le formulaire avec les résultats
     form.setValue("macroTargets", macroTargets);
-    form.setValue("recommendations", recommendations);
+    form.setValue("recommendations", result.foodList);
     form.setValue("alternatives", alternativesIfNeeded);
-
-    try {
-      // Générer une liste personnalisée avec l'IA
-      const customFoodList = await generateCustomFoodList(
-        data.age,
-        data.weight,
-        data.height,
-        data.activityLevel,
-        data.goal,
-        data.allergies,
-        data.monthlyBudget,
-        macroTargets
-      );
-
-      // Mettre à jour les recommandations avec la liste générée par l'IA
-      form.setValue("recommendations", customFoodList);
-      toast({
-        title: "Liste d'aliments personnalisée générée !",
-        description: "Vos recommandations ont été mises à jour avec des suggestions sur mesure.",
-        duration: 3000,
-      });
-    } catch (error) {
-      console.error('Erreur lors de la génération de la liste personnalisée:', error);
-      toast({
-        title: "Information",
-        description: "Utilisation des recommandations standards (la personnalisation n'a pas pu être générée)",
-        duration: 3000,
-      });
-    }
   }
 
   return (

@@ -337,6 +337,62 @@ export const generateFoodRecommendations = (
   };
 };
 
+export const calculateOptimalMealsPerDay = (
+  goal: string,
+  activityLevel: string,
+  wakeUpTime: string,
+  bedTime: string
+): number => {
+  // Convertir les heures en minutes depuis minuit pour faciliter les calculs
+  const wakeUpMinutes = convertTimeToMinutes(wakeUpTime);
+  const bedMinutes = convertTimeToMinutes(bedTime);
+  
+  // Calculer la durée d'éveil
+  let awakeTime = bedMinutes - wakeUpMinutes;
+  if (awakeTime < 0) {
+    awakeTime += 24 * 60; // Ajouter 24h si l'heure de coucher est le lendemain
+  }
+
+  // Base du nombre de repas selon l'objectif
+  let baseNumberOfMeals = 3; // Par défaut
+
+  switch (goal) {
+    case "prise_masse":
+      baseNumberOfMeals = 5; // Plus de repas pour la prise de masse
+      break;
+    case "perte_poids":
+      baseNumberOfMeals = 4; // Repas plus fréquents mais plus petits
+      break;
+    case "seche":
+      baseNumberOfMeals = 6; // Repas très fréquents pour maintenir le métabolisme
+      break;
+  }
+
+  // Ajustement selon le niveau d'activité
+  switch (activityLevel) {
+    case "tres_actif":
+    case "actif":
+      baseNumberOfMeals += 1; // Ajouter un repas pour les personnes très actives
+      break;
+    case "sedentaire":
+      baseNumberOfMeals = Math.max(3, baseNumberOfMeals - 1); // Réduire les repas pour les sédentaires
+      break;
+  }
+
+  // Si la personne est éveillée moins de 14h, limiter le nombre de repas
+  if (awakeTime < 14 * 60) {
+    baseNumberOfMeals = Math.min(baseNumberOfMeals, 4);
+  }
+
+  // Ne jamais descendre en dessous de 3 repas ou dépasser 6 repas
+  return Math.min(Math.max(baseNumberOfMeals, 3), 6);
+};
+
+const convertTimeToMinutes = (time: string): number => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
 export const generateCustomFoodList = async (
   age: number,
   weight: number,
@@ -345,8 +401,13 @@ export const generateCustomFoodList = async (
   goal: string,
   allergies: string[],
   budget: number,
-  macroTargets: MacroTargets
-): Promise<FoodItem[]> => {
+  macroTargets: MacroTargets,
+  wakeUpTime: string,
+  bedTime: string
+): Promise<{
+  foodList: FoodItem[];
+  recommendedMeals: number;
+}> => {
   try {
     const response = await fetch("https://bfdoobecenjnuelpcjou.supabase.co/functions/v1/generate-food-list", {
       method: "POST",
@@ -370,10 +431,19 @@ export const generateCustomFoodList = async (
     }
 
     const data = await response.json();
-    return data.foodList;
+    const recommendedMeals = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
+
+    return {
+      foodList: data.foodList,
+      recommendedMeals
+    };
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
-    // En cas d'erreur, on retourne la liste statique
-    return generateFoodRecommendations(macroTargets, allergies, budget).recommendations;
+    // En cas d'erreur, on retourne la liste statique et un nombre de repas calculé
+    const recommendedMeals = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
+    return {
+      foodList: generateFoodRecommendations(macroTargets, allergies, budget).recommendations,
+      recommendedMeals
+    };
   }
 };
