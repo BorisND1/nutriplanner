@@ -409,12 +409,8 @@ export const generateCustomFoodList = async (
   recommendedMeals: "3" | "4" | "5" | "6";
 }> => {
   try {
-    const response = await fetch("https://bfdoobecenjnuelpcjou.supabase.co/functions/v1/generate-food-list", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    const { data, error } = await supabase.functions.invoke('generate-food-list', {
+      body: {
         age,
         weight,
         height,
@@ -423,14 +419,14 @@ export const generateCustomFoodList = async (
         allergies,
         budget,
         macroTargets
-      }),
+      }
     });
 
-    if (!response.ok) {
+    if (error) {
+      console.error("Erreur lors de la génération de la liste d'aliments:", error);
       throw new Error("Erreur lors de la génération de la liste d'aliments");
     }
 
-    const data = await response.json();
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
 
