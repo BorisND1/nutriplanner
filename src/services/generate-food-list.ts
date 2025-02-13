@@ -71,7 +71,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4o-mini',
         messages: [
-          { role: 'system', content: 'Tu es un expert en nutrition qui génère des listes d'aliments personnalisées au format JSON.' },
+          { role: 'system', content: "Tu es un expert en nutrition qui génère des listes d'aliments personnalisées au format JSON." },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,

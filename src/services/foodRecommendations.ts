@@ -1,3 +1,4 @@
+
 interface MacroTargets {
   calories: number;
   protein: number;
@@ -348,10 +349,10 @@ export const generateCustomFoodList = async (
   macroTargets: MacroTargets
 ): Promise<FoodItem[]> => {
   try {
-    const response = await fetch('/api/generate-food-list', {
-      method: 'POST',
+    const response = await fetch("/api/generate-food-list", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
         age,
@@ -366,13 +367,13 @@ export const generateCustomFoodList = async (
     });
 
     if (!response.ok) {
-      throw new Error('Erreur lors de la génération de la liste d'aliments');
+      throw new Error("Erreur lors de la génération de la liste d'aliments");
     }
 
     const data = await response.json();
     return data.foodList;
   } catch (error) {
-    console.error('Erreur lors de la génération de la liste d'aliments:', error);
+    console.error("Erreur lors de la génération de la liste d'aliments:", error);
     // En cas d'erreur, on retourne la liste statique
     return generateFoodRecommendations(macroTargets, allergies, budget).recommendations;
   }
