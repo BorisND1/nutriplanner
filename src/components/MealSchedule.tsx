@@ -30,36 +30,59 @@ const distributeFoodByMeal = (recommendations: MealScheduleProps["recommendation
     return acc;
   }, {} as Record<string, typeof recommendations>);
 
+  // Rotation des index pour chaque catégorie pour assurer la diversité
+  const categoryIndexes: Record<string, number> = {};
+  Object.keys(foodByCategory).forEach(category => {
+    categoryIndexes[category] = 0;
+  });
+
+  // Fonction pour obtenir le prochain aliment d'une catégorie avec rotation
+  const getNextFoodFromCategory = (category: string) => {
+    if (!foodByCategory[category] || foodByCategory[category].length === 0) return null;
+    
+    const food = foodByCategory[category][categoryIndexes[category]];
+    categoryIndexes[category] = (categoryIndexes[category] + 1) % foodByCategory[category].length;
+    return food;
+  };
+
   // Distribution des aliments selon le type de repas
   return Array.from({ length: mealsCount }, (_, index) => {
     const mealFoods = [];
 
     // Petit-déjeuner
     if (index === 0) {
-      // Ajouter des céréales et produits laitiers pour le petit-déjeuner
-      if (foodByCategory["Céréales"]) {
-        mealFoods.push(...foodByCategory["Céréales"].slice(0, 1));
-      }
-      if (foodByCategory["Produits laitiers"]) {
-        mealFoods.push(...foodByCategory["Produits laitiers"].slice(0, 1));
-      }
+      // Petit déjeuner équilibré avec céréales, produits laitiers et oléagineux
+      const cereals = getNextFoodFromCategory("Céréales");
+      const dairy = getNextFoodFromCategory("Produits laitiers");
+      const nuts = getNextFoodFromCategory("Oléagineux");
+
+      if (cereals) mealFoods.push(cereals);
+      if (dairy) mealFoods.push(dairy);
+      if (nuts) mealFoods.push(nuts);
     }
     // Déjeuner et dîner
     else if (index === Math.floor(mealsCount / 2) || index === mealsCount - 1) {
-      // Ajouter des protéines et légumineuses
-      if (foodByCategory["Protéines"]) {
-        mealFoods.push(...foodByCategory["Protéines"].slice(0, 1));
-      }
-      if (foodByCategory["Légumineuses"]) {
-        mealFoods.push(...foodByCategory["Légumineuses"].slice(0, 1));
-      }
+      // Repas principaux avec protéines, légumineuses et matières grasses
+      const protein = getNextFoodFromCategory("Protéines");
+      const legumes = getNextFoodFromCategory("Légumineuses");
+      const fats = getNextFoodFromCategory("Matières grasses");
+      const cereals = getNextFoodFromCategory("Céréales");
+
+      if (protein) mealFoods.push(protein);
+      if (legumes) mealFoods.push(legumes);
+      if (fats) mealFoods.push(fats);
+      if (cereals) mealFoods.push(cereals);
     }
     // Collations
     else {
-      // Ajouter des fruits et oléagineux pour les collations
-      if (foodByCategory["Oléagineux"]) {
-        mealFoods.push(...foodByCategory["Oléagineux"].slice(0, 1));
-      }
+      // Collations variées avec oléagineux, produits laitiers ou légumineuses
+      const snacks = [
+        getNextFoodFromCategory("Oléagineux"),
+        getNextFoodFromCategory("Produits laitiers"),
+        getNextFoodFromCategory("Légumineuses")
+      ].filter(Boolean);
+
+      mealFoods.push(...snacks.slice(0, 2)); // Limite à 2 aliments par collation
     }
 
     return mealFoods;
@@ -93,12 +116,14 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
               {foodByMeal[index].length > 0 && (
                 <div className="mt-2 space-y-2">
                   <h4 className="text-sm font-medium text-foreground">Aliments suggérés :</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
                     {foodByMeal[index].map((food, foodIndex) => (
-                      <div key={foodIndex} className="bg-background/50 p-2 rounded text-sm">
+                      <div key={foodIndex} className="bg-background/50 p-3 rounded-lg text-sm">
                         <div className="font-medium">{food.name}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {food.macros.caloriesPer100g} kcal/100g · {food.macros.proteinPer100g}g protéines
+                        <div className="text-xs text-muted-foreground mt-1">
+                          <div>Calories : {food.macros.caloriesPer100g} kcal/100g</div>
+                          <div>Protéines : {food.macros.proteinPer100g}g/100g</div>
+                          <div>Prix : {food.pricePerKg}€/kg</div>
                         </div>
                       </div>
                     ))}
