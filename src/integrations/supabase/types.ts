@@ -9,7 +9,68 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      meal_notifications: {
+        Row: {
+          created_at: string
+          id: string
+          meal_name: string
+          notification_sent: boolean | null
+          scheduled_time: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          meal_name: string
+          notification_sent?: boolean | null
+          scheduled_time: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          meal_name?: string
+          notification_sent?: boolean | null
+          scheduled_time?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string | null
+          id: string
+          notification_advance_minutes: number | null
+          notification_enabled: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name?: string | null
+          id: string
+          notification_advance_minutes?: number | null
+          notification_enabled?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string | null
+          id?: string
+          notification_advance_minutes?: number | null
+          notification_enabled?: boolean | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
