@@ -4,12 +4,12 @@ import { getMessaging } from 'firebase/messaging';
 
 // Configuration Firebase
 const firebaseConfig = {
-  apiKey: '', // À remplir
-  authDomain: '', // À remplir
-  projectId: '', // À remplir
-  storageBucket: '', // À remplir
-  messagingSenderId: '', // À remplir
-  appId: '', // À remplir
+  apiKey: process.env.FIREBASE_API_KEY,
+  authDomain: "appli-web1.firebaseapp.com",
+  projectId: "appli-web1",
+  storageBucket: "appli-web1.firebasestorage.app",
+  messagingSenderId: "586705547873",
+  appId: "1:586705547873:web:257ee6476ae31b3081f020"
 };
 
 // Initialisation de Firebase
