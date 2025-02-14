@@ -18,7 +18,11 @@ interface MealScheduleProps {
   }[];
 }
 
-const distributeFoodByMeal = (recommendations: MealScheduleProps["recommendations"] = [], mealsCount: number) => {
+const distributeFoodByMeal = (
+  recommendations: MealScheduleProps["recommendations"] = [], 
+  mealsCount: number,
+  schedule: MealScheduleType[]
+) => {
   if (!recommendations.length) return new Array(mealsCount).fill([]);
 
   // Grouper les aliments par catégorie
@@ -100,7 +104,7 @@ const distributeFoodByMeal = (recommendations: MealScheduleProps["recommendation
 };
 
 export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
-  const foodByMeal = distributeFoodByMeal(recommendations, schedule.length);
+  const foodByMeal = distributeFoodByMeal(recommendations, schedule.length, schedule);
 
   return (
     <Card className="w-full mt-6">
