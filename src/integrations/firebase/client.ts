@@ -4,7 +4,7 @@ import { getMessaging } from 'firebase/messaging';
 
 // Configuration Firebase
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "appli-web1.firebaseapp.com",
   projectId: "appli-web1",
   storageBucket: "appli-web1.firebasestorage.app",

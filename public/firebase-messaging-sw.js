@@ -3,7 +3,7 @@ importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"
 importScripts("https://www.gstatic.com/firebasejs/9.22.0/firebase-messaging-compat.js");
 
 const firebaseConfig = {
-  apiKey: process.env.FIREBASE_API_KEY,
+  apiKey: "AIzaSyDhbxnEzdo8CiNkprQMqPXtNDxVnyyQtM0",
   authDomain: "appli-web1.firebaseapp.com",
   projectId: "appli-web1",
   storageBucket: "appli-web1.firebasestorage.app",
