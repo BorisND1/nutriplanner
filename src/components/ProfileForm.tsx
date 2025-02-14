@@ -26,6 +26,7 @@ import { calculateDailyMacros, generateFoodRecommendations, generateCustomFoodLi
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MealSchedule } from "./MealSchedule";
 import type { MealSchedule as MealScheduleType } from "@/services/mealSchedule";
+import { NotificationPreferences } from "./NotificationPreferences";
 
 interface MacroTargets {
   calories: number;
@@ -567,10 +568,13 @@ export function ProfileForm() {
 
         {/* Ajouter le composant MealSchedule après les résultats des macros */}
         {mealScheduleData && form.watch("recommendations") && (
-          <MealSchedule 
-            schedule={mealScheduleData} 
-            recommendations={form.watch("recommendations") as FoodItem[]}
-          />
+          <>
+            <MealSchedule 
+              schedule={mealScheduleData} 
+              recommendations={form.watch("recommendations") as FoodItem[]}
+            />
+            <NotificationPreferences />
+          </>
         )}
 
         <Button type="submit" className="w-full">
