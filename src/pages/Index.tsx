@@ -4,6 +4,7 @@ import { Calendar, User, Bell, ListChecks } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
 import { ProfileForm } from '@/components/ProfileForm';
+import { NotificationPermission } from '@/components/NotificationPermission';
 
 const Index = () => {
   return (
@@ -17,9 +18,12 @@ const Index = () => {
               <a href="#form" className="text-foreground/80 hover:text-foreground transition-colors">Programme</a>
               <a href="#profile" className="text-foreground/80 hover:text-foreground transition-colors">Profil</a>
             </div>
-            <Button variant="default" className="bg-primary hover:bg-primary/90 transition-colors">
-              Commencer
-            </Button>
+            <div className="flex items-center gap-4">
+              <NotificationPermission />
+              <Button variant="default" className="bg-primary hover:bg-primary/90 transition-colors">
+                Commencer
+              </Button>
+            </div>
           </div>
         </div>
       </nav>
