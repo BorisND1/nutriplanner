@@ -5,10 +5,14 @@ import { messaging } from "@/integrations/firebase/client";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Bell } from 'lucide-react';
+import { useInAppNotification } from '@/hooks/useInAppNotification';
 
 export function NotificationPermission() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  
+  // Activer la gestion des notifications in-app
+  useInAppNotification();
 
   const requestNotificationPermission = async () => {
     setLoading(true);
