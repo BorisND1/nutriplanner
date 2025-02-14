@@ -45,13 +45,13 @@ const distributeFoodByMeal = (recommendations: MealScheduleProps["recommendation
     return food;
   };
 
-  // Distribution des aliments selon le type de repas
+  // Distribution des aliments selon le type de repas et l'heure
   return Array.from({ length: mealsCount }, (_, index) => {
     const mealFoods = [];
+    const mealTime = Number(schedule[index].scheduledTime.split(':')[0]);
 
-    // Petit-déjeuner
-    if (index === 0) {
-      // Petit déjeuner équilibré avec céréales, produits laitiers et oléagineux
+    // Petit-déjeuner (avant 11h)
+    if (mealTime < 11) {
       const cereals = getNextFoodFromCategory("Céréales");
       const dairy = getNextFoodFromCategory("Produits laitiers");
       const nuts = getNextFoodFromCategory("Oléagineux");
@@ -60,29 +60,39 @@ const distributeFoodByMeal = (recommendations: MealScheduleProps["recommendation
       if (dairy) mealFoods.push(dairy);
       if (nuts) mealFoods.push(nuts);
     }
-    // Déjeuner et dîner
-    else if (index === Math.floor(mealsCount / 2) || index === mealsCount - 1) {
-      // Repas principaux avec protéines, légumineuses et matières grasses
+    // Déjeuner (11h-15h)
+    else if (mealTime >= 11 && mealTime < 15) {
+      const protein = getNextFoodFromCategory("Protéines");
+      const legumes = getNextFoodFromCategory("Légumineuses");
+      const cereals = getNextFoodFromCategory("Céréales");
+      const fats = getNextFoodFromCategory("Matières grasses");
+
+      if (protein) mealFoods.push(protein);
+      if (legumes) mealFoods.push(legumes);
+      if (cereals) mealFoods.push(cereals);
+      if (fats) mealFoods.push(fats);
+    }
+    // Collation (15h-18h)
+    else if (mealTime >= 15 && mealTime < 18) {
+      // Privilégier les aliments riches en protéines et les fruits secs
+      const protein = getNextFoodFromCategory("Protéines");
+      const nuts = getNextFoodFromCategory("Oléagineux");
+      const dairy = getNextFoodFromCategory("Produits laitiers");
+
+      if (protein) mealFoods.push(protein);
+      if (nuts) mealFoods.push(nuts);
+      if (dairy) mealFoods.push(dairy);
+    }
+    // Dîner (après 18h)
+    else {
+      // Repas plus léger que le déjeuner
       const protein = getNextFoodFromCategory("Protéines");
       const legumes = getNextFoodFromCategory("Légumineuses");
       const fats = getNextFoodFromCategory("Matières grasses");
-      const cereals = getNextFoodFromCategory("Céréales");
 
       if (protein) mealFoods.push(protein);
       if (legumes) mealFoods.push(legumes);
       if (fats) mealFoods.push(fats);
-      if (cereals) mealFoods.push(cereals);
-    }
-    // Collations
-    else {
-      // Collations variées avec oléagineux, produits laitiers ou légumineuses
-      const snacks = [
-        getNextFoodFromCategory("Oléagineux"),
-        getNextFoodFromCategory("Produits laitiers"),
-        getNextFoodFromCategory("Légumineuses")
-      ].filter(Boolean);
-
-      mealFoods.push(...snacks.slice(0, 2)); // Limite à 2 aliments par collation
     }
 
     return mealFoods;
