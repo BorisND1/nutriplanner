@@ -8,6 +8,7 @@ interface UseGeolocationResult {
     currencyCode: string;
     currencySymbol: string;
     exchangeRateToEuro: number;
+    exchange_rates_updated_at?: string;
   } | null;
   loading: boolean;
   error: string | null;
@@ -19,6 +20,7 @@ export const useGeolocation = (): UseGeolocationResult => {
     currencyCode: string;
     currencySymbol: string;
     exchangeRateToEuro: number;
+    exchange_rates_updated_at?: string;
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -26,7 +28,7 @@ export const useGeolocation = (): UseGeolocationResult => {
   const getCurrencyInfo = async (region: string) => {
     const { data, error } = await supabase
       .from('currency_by_region')
-      .select('currency_code, currency_symbol, exchange_rate_to_euro')
+      .select('currency_code, currency_symbol, exchange_rate_to_euro, exchange_rates_updated_at')
       .eq('region', region)
       .single();
 
@@ -38,7 +40,8 @@ export const useGeolocation = (): UseGeolocationResult => {
     return {
       currencyCode: data.currency_code,
       currencySymbol: data.currency_symbol,
-      exchangeRateToEuro: data.exchange_rate_to_euro
+      exchangeRateToEuro: data.exchange_rate_to_euro,
+      exchange_rates_updated_at: data.exchange_rates_updated_at
     };
   };
 
