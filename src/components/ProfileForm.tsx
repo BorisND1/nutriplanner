@@ -27,6 +27,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { MealSchedule } from "./MealSchedule";
 import type { MealSchedule as MealScheduleType } from "@/services/mealSchedule";
 import { NotificationPreferences } from "./NotificationPreferences";
+import { Switch } from "@/components/ui/switch";
 
 interface MacroTargets {
   calories: number;
@@ -90,6 +91,23 @@ const profileFormSchema = z.object({
     }),
     allergenes: z.array(z.string()),
   })).optional(),
+  workSchedule: z.object({
+    workDays: z.array(z.enum(["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"])),
+    startTime: z.string().min(1, "L'heure de début est requise"),
+    endTime: z.string().min(1, "L'heure de fin est requise"),
+    lunchBreak: z.object({
+      duration: z.string().min(1, "La durée de la pause est requise"),
+      isFixedTime: z.boolean(),
+      fixedStartTime: z.string().optional(),
+    }),
+    additionalConstraints: z.array(z.enum([
+      "deplacements_frequents",
+      "teletravail",
+      "horaires_variables",
+      "reunions_frequentes",
+      "travail_weekend"
+    ])).default([])
+  }).optional(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -100,6 +118,17 @@ const defaultValues: Partial<ProfileFormValues> = {
   mealsPerDay: "4",
   allergies: [],
   otherAllergies: "",
+  workSchedule: {
+    workDays: ["lundi", "mardi", "mercredi", "jeudi", "vendredi"],
+    startTime: "09:00",
+    endTime: "17:00",
+    lunchBreak: {
+      duration: "60",
+      isFixedTime: true,
+      fixedStartTime: "12:00"
+    },
+    additionalConstraints: []
+  }
 };
 
 const allergiesList = [
@@ -459,6 +488,183 @@ export function ProfileForm() {
                     <SelectItem value="6">6 repas</SelectItem>
                   </SelectContent>
                 </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-foreground">Contraintes professionnelles</h2>
+          
+          <FormField
+            control={form.control}
+            name="workSchedule.workDays"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Jours travaillés</FormLabel>
+                <FormControl>
+                  <div className="flex flex-wrap gap-2">
+                    {["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"].map((day) => (
+                      <div
+                        key={day}
+                        className={`px-4 py-2 rounded-full cursor-pointer transition-colors ${
+                          field.value.includes(day)
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-secondary text-secondary-foreground"
+                        }`}
+                        onClick={() => {
+                          const newValue = field.value.includes(day)
+                            ? field.value.filter((d) => d !== day)
+                            : [...field.value, day];
+                          field.onChange(newValue);
+                        }}
+                      >
+                        {day.charAt(0).toUpperCase() + day.slice(1)}
+                      </div>
+                    ))}
+                  </div>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="workSchedule.startTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Heure de début</FormLabel>
+                  <FormControl>
+                    <Input type="time" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            
+            <FormField
+              control={form.control}
+              name="workSchedule.endTime"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Heure de fin</FormLabel>
+                  <FormControl>
+                    <Input type="time" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <Card className="mt-4">
+            <CardHeader>
+              <CardTitle>Pause déjeuner</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <FormField
+                control={form.control}
+                name="workSchedule.lunchBreak.duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Durée (minutes)</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Sélectionnez la durée" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="30">30 minutes</SelectItem>
+                        <SelectItem value="45">45 minutes</SelectItem>
+                        <SelectItem value="60">1 heure</SelectItem>
+                        <SelectItem value="90">1 heure 30</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="workSchedule.lunchBreak.isFixedTime"
+                render={({ field }) => (
+                  <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                    <div className="space-y-0.5">
+                      <FormLabel className="text-base">Horaire fixe</FormLabel>
+                      <FormDescription>
+                        Activez si vous avez un horaire fixe pour la pause déjeuner
+                      </FormDescription>
+                    </div>
+                    <FormControl>
+                      <Switch
+                        checked={field.value}
+                        onCheckedChange={field.onChange}
+                      />
+                    </FormControl>
+                  </FormItem>
+                )}
+              />
+
+              {form.watch("workSchedule.lunchBreak.isFixedTime") && (
+                <FormField
+                  control={form.control}
+                  name="workSchedule.lunchBreak.fixedStartTime"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Heure de début fixe</FormLabel>
+                      <FormControl>
+                        <Input type="time" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </CardContent>
+          </Card>
+
+          <FormField
+            control={form.control}
+            name="workSchedule.additionalConstraints"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Contraintes supplémentaires</FormLabel>
+                <FormDescription>
+                  Sélectionnez toutes les contraintes qui s'appliquent à votre situation
+                </FormDescription>
+                <FormControl>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {[
+                      { value: "deplacements_frequents", label: "Déplacements fréquents" },
+                      { value: "teletravail", label: "Télétravail" },
+                      { value: "horaires_variables", label: "Horaires variables" },
+                      { value: "reunions_frequentes", label: "Réunions fréquentes" },
+                      { value: "travail_weekend", label: "Travail le weekend occasionnel" }
+                    ].map((constraint) => (
+                      <div
+                        key={constraint.value}
+                        className={`p-4 rounded-lg border cursor-pointer transition-colors ${
+                          field.value.includes(constraint.value)
+                            ? "bg-primary text-primary-foreground border-primary"
+                            : "bg-background text-foreground hover:bg-secondary/50"
+                        }`}
+                        onClick={() => {
+                          const newValue = field.value.includes(constraint.value)
+                            ? field.value.filter((v) => v !== constraint.value)
+                            : [...field.value, constraint.value];
+                          field.onChange(newValue);
+                        }}
+                      >
+                        {constraint.label}
+                      </div>
+                    ))}
+                  </div>
+                </FormControl>
                 <FormMessage />
               </FormItem>
             )}
