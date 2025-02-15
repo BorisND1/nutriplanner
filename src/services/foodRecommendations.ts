@@ -1,3 +1,13 @@
+
+import { supabase } from "@/integrations/supabase/client";
+import { generateMealSchedule, MealSchedule } from "./mealSchedule";
+
+interface CurrencyInfo {
+  currencyCode: string;
+  currencySymbol: string;
+  exchangeRateToEuro: number;
+}
+
 interface MacroTargets {
   calories: number;
   protein: number;
@@ -32,7 +42,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 0,
       fatsPer100g: 3.6
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Bœuf (steak haché 5%)",
@@ -45,7 +56,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 0,
       fatsPer100g: 5
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Saumon",
@@ -58,7 +70,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 0,
       fatsPer100g: 13
     },
-    allergenes: ["poisson"]
+    allergenes: ["poisson"],
+    region: "Europe"
   },
   {
     name: "Thon en conserve",
@@ -71,7 +84,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 0,
       fatsPer100g: 1
     },
-    allergenes: ["poisson"]
+    allergenes: ["poisson"],
+    region: "Europe"
   },
   {
     name: "Œufs",
@@ -84,7 +98,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 1.1,
       fatsPer100g: 11
     },
-    allergenes: ["oeufs"]
+    allergenes: ["oeufs"],
+    region: "Europe"
   },
   {
     name: "Tofu",
@@ -97,7 +112,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 1.9,
       fatsPer100g: 4.8
     },
-    allergenes: ["soja"]
+    allergenes: ["soja"],
+    region: "Europe"
   },
   {
     name: "Quinoa",
@@ -110,7 +126,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 21.3,
       fatsPer100g: 1.9
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Riz brun",
@@ -123,7 +140,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 23,
       fatsPer100g: 0.9
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Avoine",
@@ -136,7 +154,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 66.3,
       fatsPer100g: 6.9
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Pain complet",
@@ -149,7 +168,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 41,
       fatsPer100g: 3.3
     },
-    allergenes: ["gluten"]
+    allergenes: ["gluten"],
+    region: "Europe"
   },
   {
     name: "Patate douce",
@@ -162,7 +182,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 20.1,
       fatsPer100g: 0.1
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Yaourt grec",
@@ -175,7 +196,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 3.6,
       fatsPer100g: 5
     },
-    allergenes: ["lactose"]
+    allergenes: ["lactose"],
+    region: "Europe"
   },
   {
     name: "Fromage blanc 0%",
@@ -188,7 +210,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 4,
       fatsPer100g: 0.2
     },
-    allergenes: ["lactose"]
+    allergenes: ["lactose"],
+    region: "Europe"
   },
   {
     name: "Amandes",
@@ -201,7 +224,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 22,
       fatsPer100g: 49
     },
-    allergenes: ["fruits_a_coque"]
+    allergenes: ["fruits_a_coque"],
+    region: "Europe"
   },
   {
     name: "Graines de chia",
@@ -214,7 +238,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 42,
       fatsPer100g: 31
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Lentilles",
@@ -227,7 +252,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 20,
       fatsPer100g: 0.4
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Pois chiches",
@@ -240,7 +266,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 61,
       fatsPer100g: 6
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   },
   {
     name: "Huile d'olive",
@@ -253,7 +280,8 @@ const foodDatabase: FoodItem[] = [
       carbsPer100g: 0,
       fatsPer100g: 100
     },
-    allergenes: []
+    allergenes: [],
+    region: "Europe"
   }
 ];
 
@@ -453,6 +481,22 @@ export const generateCustomFoodList = async (
       throw new Error("Erreur lors de la récupération des aliments régionaux");
     }
 
+    // Transformer les données pour correspondre à la structure FoodItem
+    const formattedFoods: FoodItem[] = regionalFoods.map(food => ({
+      name: food.name,
+      category: food.category,
+      pricePerKg: food.price_per_kg,
+      localPricePerKg: food.local_price_per_kg,
+      macros: {
+        caloriesPer100g: food.calories_per_100g,
+        proteinPer100g: food.protein_per_100g,
+        carbsPer100g: food.carbs_per_100g,
+        fatsPer100g: food.fat_per_100g
+      },
+      allergenes: [],
+      region: food.region
+    }));
+
     // Récupérer des alternatives économiques pour chaque catégorie principale
     const categories = ["Protéines", "Céréales", "Légumes", "Fruits"];
     const alternativesPromises = categories.map(category => 
@@ -481,22 +525,6 @@ export const generateCustomFoodList = async (
         allergenes: [],
         region: food.region
       }));
-
-    // Transformer les données pour correspondre à la structure FoodItem
-    const formattedFoods: FoodItem[] = regionalFoods.map(food => ({
-      name: food.name,
-      category: food.category,
-      pricePerKg: food.price_per_kg,
-      localPricePerKg: food.local_price_per_kg,
-      macros: {
-        caloriesPer100g: food.calories_per_100g,
-        proteinPer100g: food.protein_per_100g,
-        carbsPer100g: food.carbs_per_100g,
-        fatsPer100g: food.fat_per_100g
-      },
-      allergenes: [],
-      region: food.region
-    }));
 
     // Filtrer les aliments en fonction des allergies
     const filteredFoods = formattedFoods.filter(food => 
