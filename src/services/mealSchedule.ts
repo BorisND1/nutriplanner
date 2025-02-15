@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import type { FoodItem } from "./foodRecommendations";
 
@@ -89,15 +90,15 @@ const mealTimingsByGoal: { [key: string]: MealTiming[] } = {
   ],
   prise_masse: [
     { 
-      mealName: "Petit-déjeuner", 
+      mealName: "Petit-déjeuner copieux", 
       idealTimeOffset: 30, 
       flexibilityRange: 30, 
-      complexity: "simple", 
+      complexity: "elaborate", 
       isPackable: false,
       suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers", "Oléagineux"]
     },
     { 
-      mealName: "Collation matinale", 
+      mealName: "Collation protéinée matinale", 
       idealTimeOffset: 180, 
       flexibilityRange: 30, 
       complexity: "simple", 
@@ -105,36 +106,36 @@ const mealTimingsByGoal: { [key: string]: MealTiming[] } = {
       suggestedFoodCategories: ["Protéines", "Oléagineux", "Produits laitiers"]
     },
     { 
-      mealName: "Déjeuner", 
+      mealName: "Déjeuner riche", 
       idealTimeOffset: 360, 
       flexibilityRange: 45, 
-      complexity: "moderate", 
+      complexity: "elaborate", 
       isPackable: true,
       suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
     },
     { 
-      mealName: "Collation après-midi", 
-      idealTimeOffset: 540, 
+      mealName: "Collation pré-entraînement", 
+      idealTimeOffset: 480, 
       flexibilityRange: 30, 
       complexity: "simple", 
       isPackable: true,
       suggestedFoodCategories: ["Produits laitiers", "Oléagineux", "Protéines"]
     },
     { 
-      mealName: "Dîner", 
+      mealName: "Collation post-entraînement", 
+      idealTimeOffset: 600, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: true,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers"]
+    },
+    { 
+      mealName: "Dîner consistant", 
       idealTimeOffset: 720, 
       flexibilityRange: 45, 
       complexity: "elaborate", 
       isPackable: false,
       suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
-    },
-    { 
-      mealName: "Collation nocturne", 
-      idealTimeOffset: 840, 
-      flexibilityRange: 30, 
-      complexity: "simple", 
-      isPackable: false,
-      suggestedFoodCategories: ["Produits laitiers", "Protéines"]
     }
   ]
 };
@@ -211,13 +212,37 @@ export const generateMealSchedule = (
 ): MealSchedule[] => {
   const mealTimings = [...mealTimingsByGoal[goal]];
   
-  // Si le nombre de repas demandé est inférieur, on retire des collations en priorité
-  while (mealTimings.length > numberOfMeals) {
-    const snackIndex = mealTimings.findIndex(meal => meal.mealName.includes("Collation"));
-    if (snackIndex !== -1) {
-      mealTimings.splice(snackIndex, 1);
+  // Optimisation du nombre de repas en fonction de l'objectif
+  const optimalNumberOfMeals = {
+    perte_poids: { min: 3, max: 4 },
+    seche: { min: 4, max: 5 },
+    prise_masse: { min: 4, max: 6 }
+  };
+
+  const { min, max } = optimalNumberOfMeals[goal as keyof typeof optimalNumberOfMeals];
+  let adjustedNumberOfMeals = Math.max(min, Math.min(max, numberOfMeals));
+
+  // Si le nombre de repas demandé est inférieur au minimum recommandé, on utilise le minimum
+  while (mealTimings.length > adjustedNumberOfMeals) {
+    // Pour la prise de masse, on garde les repas principaux et post-entraînement
+    if (goal === 'prise_masse') {
+      const snackIndex = mealTimings.findIndex(meal => 
+        meal.mealName.includes("Collation") && 
+        !meal.mealName.includes("post-entraînement")
+      );
+      if (snackIndex !== -1) {
+        mealTimings.splice(snackIndex, 1);
+      } else {
+        mealTimings.pop();
+      }
     } else {
-      mealTimings.pop();
+      // Pour les autres objectifs, on retire d'abord les collations
+      const snackIndex = mealTimings.findIndex(meal => meal.mealName.includes("Collation"));
+      if (snackIndex !== -1) {
+        mealTimings.splice(snackIndex, 1);
+      } else {
+        mealTimings.pop();
+      }
     }
   }
 
@@ -231,7 +256,14 @@ export const generateMealSchedule = (
     awakeTime += 24 * 60; // Ajouter 24h si l'heure de coucher est le lendemain
   }
 
-  return mealTimings.map(timing => {
+  // Calcul des intervalles optimaux entre les repas
+  const awakeMinutes = awakeTime;
+  const idealInterval = Math.floor(awakeMinutes / (mealTimings.length + 1));
+
+  return mealTimings.map((timing, index) => {
+    // Ajuster l'idealTimeOffset en fonction de l'intervalle optimal
+    timing.idealTimeOffset = (index + 1) * idealInterval;
+
     let scheduledMinutes = wakeTimeInMinutes + timing.idealTimeOffset;
     let complexity = timing.complexity;
     let suggestedFoods: FoodItem[] = [];
@@ -241,11 +273,16 @@ export const generateMealSchedule = (
       suggestedFoods = recommendedFoods.filter(food => 
         timing.suggestedFoodCategories.includes(food.category)
       ).sort((a, b) => {
-        // Prioriser les aliments adaptés à la complexité du repas
-        if (complexity === "simple" && a.pricePerKg < b.pricePerKg) return -1;
-        if (complexity === "elaborate" && a.macros.proteinPer100g > b.macros.proteinPer100g) return -1;
+        // Prioriser les aliments riches en protéines pour la prise de masse
+        if (goal === 'prise_masse') {
+          return b.macros.proteinPer100g - a.macros.proteinPer100g;
+        }
+        // Prioriser les aliments moins caloriques pour la perte de poids
+        if (goal === 'perte_poids') {
+          return a.macros.caloriesPer100g - b.macros.caloriesPer100g;
+        }
         return 0;
-      }).slice(0, 4); // Limiter à 4 suggestions par repas
+      }).slice(0, 4);
     }
 
     // Ajuster le timing et la complexité en fonction du planning de travail
@@ -264,7 +301,7 @@ export const generateMealSchedule = (
 
     const scheduledTime = `${String(scheduledHours).padStart(2, '0')}:${String(remainingMinutes).padStart(2, '0')}`;
 
-    // Calcul des plages de flexibilité
+    // Calcul des plages de flexibilité optimisées
     let flexBeforeMinutes = (scheduledMinutes - timing.flexibilityRange + 24 * 60) % (24 * 60);
     let flexAfterMinutes = (scheduledMinutes + timing.flexibilityRange) % (24 * 60);
 
