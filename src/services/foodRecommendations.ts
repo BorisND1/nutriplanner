@@ -244,10 +244,8 @@ export const calculateDailyMacros = (
   activityLevel: string,
   goal: string
 ): MacroTargets => {
-  // Calcul BMR (Basal Metabolic Rate) avec l'équation de Mifflin-St Jeor
   let bmr = 10 * weight + 6.25 * height - 5 * age;
 
-  // Facteur d'activité
   const activityFactors: { [key: string]: number } = {
     sedentaire: 1.2,
     leger: 1.375,
@@ -256,35 +254,33 @@ export const calculateDailyMacros = (
     tres_actif: 1.9
   };
 
-  let tdee = bmr * activityFactors[activityLevel]; // Total Daily Energy Expenditure
+  let tdee = bmr * activityFactors[activityLevel];
 
-  // Ajustement selon l'objectif
   const goalAdjustments: { [key: string]: number } = {
-    prise_masse: 1.1, // +10% calories
-    perte_poids: 0.8, // -20% calories
-    seche: 0.85 // -15% calories
+    prise_masse: 1.1,
+    perte_poids: 0.8,
+    seche: 0.85
   };
 
   let targetCalories = tdee * goalAdjustments[goal];
 
-  // Répartition des macronutriments selon l'objectif
   let proteinRatio, carbsRatio, fatsRatio;
 
   switch (goal) {
     case "prise_masse":
-      proteinRatio = 0.25; // 25% des calories
-      carbsRatio = 0.50; // 50% des calories
-      fatsRatio = 0.25; // 25% des calories
+      proteinRatio = 0.25;
+      carbsRatio = 0.50;
+      fatsRatio = 0.25;
       break;
     case "perte_poids":
-      proteinRatio = 0.40; // 40% des calories
-      carbsRatio = 0.35; // 35% des calories
-      fatsRatio = 0.25; // 25% des calories
+      proteinRatio = 0.40;
+      carbsRatio = 0.35;
+      fatsRatio = 0.25;
       break;
     case "seche":
-      proteinRatio = 0.45; // 45% des calories
-      carbsRatio = 0.30; // 30% des calories
-      fatsRatio = 0.25; // 25% des calories
+      proteinRatio = 0.45;
+      carbsRatio = 0.30;
+      fatsRatio = 0.25;
       break;
     default:
       proteinRatio = 0.30;
@@ -294,9 +290,9 @@ export const calculateDailyMacros = (
 
   return {
     calories: Math.round(targetCalories),
-    protein: Math.round((targetCalories * proteinRatio) / 4), // 4 calories par gramme de protéines
-    carbs: Math.round((targetCalories * carbsRatio) / 4), // 4 calories par gramme de glucides
-    fats: Math.round((targetCalories * fatsRatio) / 9) // 9 calories par gramme de lipides
+    protein: Math.round((targetCalories * proteinRatio) / 4),
+    carbs: Math.round((targetCalories * carbsRatio) / 4),
+    fats: Math.round((targetCalories * fatsRatio) / 9)
   };
 };
 
@@ -308,24 +304,20 @@ export const generateFoodRecommendations = (
   recommendations: FoodItem[];
   alternativesIfNeeded: FoodItem[];
 } => {
-  // Filtrer les aliments en fonction des allergies
   let availableFoods = foodDatabase.filter(food => 
     !food.allergenes.some(allergene => allergies.includes(allergene))
   );
 
-  // Trier les aliments par rapport qualité/prix (protéines par euro)
   const sortedByValue = availableFoods.sort((a, b) => 
     (b.macros.proteinPer100g / b.pricePerKg) - (a.macros.proteinPer100g / a.pricePerKg)
   );
 
-  // Sélectionner les meilleurs aliments dans chaque catégorie
   const recommendations = {
     proteins: sortedByValue.filter(food => food.macros.proteinPer100g > 20).slice(0, 3),
     carbs: sortedByValue.filter(food => food.macros.carbsPer100g > 15).slice(0, 3),
     fats: sortedByValue.filter(food => food.macros.fatsPer100g > 10).slice(0, 2)
   };
 
-  // Trouver des alternatives économiques si nécessaire
   const alternativesIfNeeded = availableFoods
     .filter(food => food.pricePerKg < 5)
     .sort((a, b) => b.macros.proteinPer100g - a.macros.proteinPer100g)
@@ -343,48 +335,42 @@ export const calculateOptimalMealsPerDay = (
   wakeUpTime: string,
   bedTime: string
 ): number => {
-  // Convertir les heures en minutes depuis minuit pour faciliter les calculs
   const wakeUpMinutes = convertTimeToMinutes(wakeUpTime);
   const bedMinutes = convertTimeToMinutes(bedTime);
   
-  // Calculer la durée d'éveil
   let awakeTime = bedMinutes - wakeUpMinutes;
   if (awakeTime < 0) {
-    awakeTime += 24 * 60; // Ajouter 24h si l'heure de coucher est le lendemain
+    awakeTime += 24 * 60;
   }
 
-  // Base du nombre de repas selon l'objectif
-  let baseNumberOfMeals = 3; // Par défaut
+  let baseNumberOfMeals = 3;
 
   switch (goal) {
     case "prise_masse":
-      baseNumberOfMeals = 5; // Plus de repas pour la prise de masse
+      baseNumberOfMeals = 5;
       break;
     case "perte_poids":
-      baseNumberOfMeals = 4; // Repas plus fréquents mais plus petits
+      baseNumberOfMeals = 4;
       break;
     case "seche":
-      baseNumberOfMeals = 6; // Repas très fréquents pour maintenir le métabolisme
+      baseNumberOfMeals = 6;
       break;
   }
 
-  // Ajustement selon le niveau d'activité
   switch (activityLevel) {
     case "tres_actif":
     case "actif":
-      baseNumberOfMeals += 1; // Ajouter un repas pour les personnes très actives
+      baseNumberOfMeals += 1;
       break;
     case "sedentaire":
-      baseNumberOfMeals = Math.max(3, baseNumberOfMeals - 1); // Réduire les repas pour les sédentaires
+      baseNumberOfMeals = Math.max(3, baseNumberOfMeals - 1);
       break;
   }
 
-  // Si la personne est éveillée moins de 14h, limiter le nombre de repas
   if (awakeTime < 14 * 60) {
     baseNumberOfMeals = Math.min(baseNumberOfMeals, 4);
   }
 
-  // Ne jamais descendre en dessous de 3 repas ou dépasser 6 repas
   return Math.min(Math.max(baseNumberOfMeals, 3), 6);
 };
 
@@ -434,7 +420,6 @@ export const generateCustomFoodList = async (
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
 
-    // Générer le planning des repas
     const mealSchedule = generateMealSchedule(
       wakeUpTime,
       bedTime,
@@ -449,11 +434,9 @@ export const generateCustomFoodList = async (
     };
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
-    // En cas d'erreur, on retourne la liste statique et un nombre de repas calculé
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
-    
-    // Générer le planning des repas même en cas d'erreur
+
     const mealSchedule = generateMealSchedule(
       wakeUpTime,
       bedTime,
