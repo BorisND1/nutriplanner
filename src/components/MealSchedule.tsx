@@ -1,6 +1,7 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MealSchedule as MealScheduleType } from "@/services/mealSchedule";
+import { PackageOpen, Clock, ChefHat } from "lucide-react";
 
 interface MealScheduleProps {
   schedule: MealScheduleType[];
@@ -49,10 +50,11 @@ const distributeFoodByMeal = (
     return food;
   };
 
-  // Distribution des aliments selon le type de repas et l'heure
+  // Distribution des aliments selon le type de repas, l'heure et la complexité
   return Array.from({ length: mealsCount }, (_, index) => {
     const mealFoods = [];
     const mealTime = Number(schedule[index].scheduledTime.split(':')[0]);
+    const { complexity, isPackable } = schedule[index];
 
     // Petit-déjeuner (avant 11h)
     if (mealTime < 11) {
@@ -66,37 +68,49 @@ const distributeFoodByMeal = (
     }
     // Déjeuner (11h-15h)
     else if (mealTime >= 11 && mealTime < 15) {
-      const protein = getNextFoodFromCategory("Protéines");
-      const legumes = getNextFoodFromCategory("Légumineuses");
-      const cereals = getNextFoodFromCategory("Céréales");
-      const fats = getNextFoodFromCategory("Matières grasses");
-
-      if (protein) mealFoods.push(protein);
-      if (legumes) mealFoods.push(legumes);
-      if (cereals) mealFoods.push(cereals);
-      if (fats) mealFoods.push(fats);
+      // Adapter les aliments en fonction de la complexité
+      if (complexity === "simple" || isPackable) {
+        const protein = getNextFoodFromCategory("Protéines");
+        const legumes = getNextFoodFromCategory("Légumineuses");
+        if (protein) mealFoods.push(protein);
+        if (legumes) mealFoods.push(legumes);
+      } else {
+        const protein = getNextFoodFromCategory("Protéines");
+        const legumes = getNextFoodFromCategory("Légumineuses");
+        const cereals = getNextFoodFromCategory("Céréales");
+        const fats = getNextFoodFromCategory("Matières grasses");
+        if (protein) mealFoods.push(protein);
+        if (legumes) mealFoods.push(legumes);
+        if (cereals) mealFoods.push(cereals);
+        if (fats) mealFoods.push(fats);
+      }
     }
     // Collation (15h-18h)
     else if (mealTime >= 15 && mealTime < 18) {
-      // Privilégier les aliments riches en protéines et les fruits secs
       const protein = getNextFoodFromCategory("Protéines");
       const nuts = getNextFoodFromCategory("Oléagineux");
       const dairy = getNextFoodFromCategory("Produits laitiers");
-
       if (protein) mealFoods.push(protein);
       if (nuts) mealFoods.push(nuts);
       if (dairy) mealFoods.push(dairy);
     }
     // Dîner (après 18h)
     else {
-      // Repas plus léger que le déjeuner
-      const protein = getNextFoodFromCategory("Protéines");
-      const legumes = getNextFoodFromCategory("Légumineuses");
-      const fats = getNextFoodFromCategory("Matières grasses");
-
-      if (protein) mealFoods.push(protein);
-      if (legumes) mealFoods.push(legumes);
-      if (fats) mealFoods.push(fats);
+      if (complexity === "simple") {
+        const protein = getNextFoodFromCategory("Protéines");
+        const legumes = getNextFoodFromCategory("Légumineuses");
+        if (protein) mealFoods.push(protein);
+        if (legumes) mealFoods.push(legumes);
+      } else {
+        const protein = getNextFoodFromCategory("Protéines");
+        const legumes = getNextFoodFromCategory("Légumineuses");
+        const cereals = getNextFoodFromCategory("Céréales");
+        const fats = getNextFoodFromCategory("Matières grasses");
+        if (protein) mealFoods.push(protein);
+        if (legumes) mealFoods.push(legumes);
+        if (cereals) mealFoods.push(cereals);
+        if (fats) mealFoods.push(fats);
+      }
     }
 
     return mealFoods;
@@ -105,6 +119,29 @@ const distributeFoodByMeal = (
 
 export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
   const foodByMeal = distributeFoodByMeal(recommendations, schedule.length, schedule);
+
+  const getComplexityLabel = (complexity: "simple" | "moderate" | "elaborate") => {
+    switch (complexity) {
+      case "simple":
+        return "Repas simple et rapide";
+      case "moderate":
+        return "Repas de complexité moyenne";
+      case "elaborate":
+        return "Repas élaboré";
+    }
+  };
+
+  const getComplexityIcon = (complexity: "simple" | "moderate" | "elaborate") => {
+    const className = "w-4 h-4 inline-block mr-2";
+    switch (complexity) {
+      case "simple":
+        return <Clock className={className} />;
+      case "moderate":
+        return <ChefHat className={className} style={{ opacity: 0.5 }} />;
+      case "elaborate":
+        return <ChefHat className={className} />;
+    }
+  };
 
   return (
     <Card className="w-full mt-6">
@@ -124,6 +161,19 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
               </div>
               <div className="text-sm text-muted-foreground">
                 Plage horaire flexible : {meal.flexibilityBefore} - {meal.flexibilityAfter}
+              </div>
+              
+              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                <span className="flex items-center">
+                  {getComplexityIcon(meal.complexity)}
+                  {getComplexityLabel(meal.complexity)}
+                </span>
+                {meal.isPackable && (
+                  <span className="flex items-center">
+                    <PackageOpen className="w-4 h-4 inline-block mr-2" />
+                    À emporter possible
+                  </span>
+                )}
               </div>
               
               {/* Affichage des aliments recommandés pour ce repas */}
