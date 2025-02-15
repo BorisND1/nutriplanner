@@ -24,7 +24,9 @@ serve(async (req) => {
       allergies, 
       budget,
       macroTargets,
-      region
+      region,
+      availableFoods,
+      economicAlternatives
     } = await req.json()
 
     const prompt = `En tant que nutritionniste expert, génère une liste d'aliments adaptée à ce profil et basée sur les aliments traditionnels de la région ${region} :
@@ -42,7 +44,14 @@ serve(async (req) => {
       * Glucides : ${macroTargets.carbs}g
       * Lipides : ${macroTargets.fats}g
 
+    Liste des aliments disponibles :
+    ${JSON.stringify(availableFoods, null, 2)}
+
+    Alternatives économiques disponibles :
+    ${JSON.stringify(economicAlternatives, null, 2)}
+
     Privilégie les aliments traditionnels et facilement disponibles dans la région ${region}.
+    Si le budget est limité, utilise les alternatives économiques proposées.
     Prends en compte les habitudes alimentaires locales et les préférences culturelles de la région.
     
     Retourne une liste d'aliments au format JSON avec cette structure exacte pour chaque aliment :
@@ -62,11 +71,11 @@ serve(async (req) => {
 
     Inclure uniquement des aliments qui :
     1. Respectent les contraintes d'allergies mentionnées
-    2. Sont adaptés au budget indiqué
+    2. Sont adaptés au budget indiqué (utilise les alternatives économiques si nécessaire)
     3. Aident à atteindre les objectifs nutritionnels
     4. Sont facilement trouvables dans la région ${region}
     5. Sont culturellement appropriés pour la région
-    6. Proviennent principalement de notre base de données d'aliments régionaux
+    6. Proviennent de notre base de données d'aliments régionaux
 
     Retourne exactement 15 aliments typiques de la région.`
 

@@ -177,6 +177,23 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_budget_alternatives: {
+        Args: {
+          p_region: string
+          p_budget: number
+          p_category: string
+        }
+        Returns: {
+          name: string
+          category: string
+          price_per_kg: number
+          calories_per_100g: number
+          protein_per_100g: number
+          carbs_per_100g: number
+          fat_per_100g: number
+          region: string
+        }[]
+      }
       get_foods_by_region_and_budget: {
         Args: {
           p_region: string

@@ -426,6 +426,34 @@ export const generateCustomFoodList = async (
       throw new Error("Erreur lors de la récupération des aliments régionaux");
     }
 
+    // Récupérer des alternatives économiques pour chaque catégorie principale
+    const categories = ["Protéines", "Céréales", "Légumes", "Fruits"];
+    const alternativesPromises = categories.map(category => 
+      supabase.rpc('get_budget_alternatives', {
+        p_region: region,
+        p_budget: budget * 0.7, // 70% du budget pour trouver des alternatives vraiment économiques
+        p_category: category
+      })
+    );
+
+    const alternativesResults = await Promise.all(alternativesPromises);
+    const economicAlternatives = alternativesResults
+      .map(result => result.data || [])
+      .flat()
+      .map(food => ({
+        name: food.name,
+        category: food.category,
+        pricePerKg: food.price_per_kg,
+        macros: {
+          caloriesPer100g: food.calories_per_100g,
+          proteinPer100g: food.protein_per_100g,
+          carbsPer100g: food.carbs_per_100g,
+          fatsPer100g: food.fat_per_100g
+        },
+        allergenes: [], // À compléter si nécessaire
+        region: food.region
+      }));
+
     // Transformer les données pour correspondre à la structure FoodItem
     const formattedFoods: FoodItem[] = regionalFoods.map(food => ({
       name: food.name,
@@ -458,7 +486,8 @@ export const generateCustomFoodList = async (
         budget,
         macroTargets,
         region,
-        availableFoods: filteredFoods // Passer les aliments filtrés à la fonction
+        availableFoods: filteredFoods,
+        economicAlternatives // Ajouter les alternatives économiques
       }
     });
 
