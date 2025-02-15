@@ -312,26 +312,26 @@ export const getAdaptedRecommendations = async (recommendations: FoodItem[]): Pr
   if (!user) throw new Error("Utilisateur non connecté");
 
   // Récupérer le profil utilisateur avec ses contraintes
-  const { data: profiles } = await supabase
+  const { data: profile } = await supabase
     .from('profiles')
     .select('*')
     .eq('id', user.id)
     .single();
 
-  if (!profiles) return recommendations;
+  if (!profile) return recommendations;
 
   // Filtrer les recommandations en fonction des allergies et du budget
   return recommendations.filter(food => {
     // Vérifier les allergies
     const hasAllergy = food.allergenes?.some(allergene => 
-      profiles.allergies?.includes(allergene)
+      profile.allergies?.includes(allergene)
     );
     if (hasAllergy) return false;
 
     // Vérifier le budget (si défini)
-    if (profiles.monthly_budget) {
+    if (profile.monthly_budget) {
       // Estimation simple : le budget quotidien divisé par le nombre de repas
-      const dailyBudget = profiles.monthly_budget / 30;
+      const dailyBudget = profile.monthly_budget / 30;
       const maxPricePerMeal = dailyBudget / 3; // Hypothèse de 3 repas par jour
       if (food.pricePerKg > maxPricePerMeal * 2) return false; // Marge de sécurité
     }
@@ -351,4 +351,15 @@ export interface FoodItem {
     fatsPer100g: number;
   };
   allergenes?: string[];
+}
+
+export interface Profile {
+  id: string;
+  email: string;
+  first_name: string | null;
+  created_at: string;
+  notification_enabled: boolean;
+  notification_advance_minutes: number;
+  allergies: string[];
+  monthly_budget: number | null;
 }

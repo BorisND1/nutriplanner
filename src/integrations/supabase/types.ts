@@ -93,26 +93,32 @@ export type Database = {
       }
       profiles: {
         Row: {
+          allergies: string[] | null
           created_at: string
           email: string
           first_name: string | null
           id: string
+          monthly_budget: number | null
           notification_advance_minutes: number | null
           notification_enabled: boolean | null
         }
         Insert: {
+          allergies?: string[] | null
           created_at?: string
           email: string
           first_name?: string | null
           id: string
+          monthly_budget?: number | null
           notification_advance_minutes?: number | null
           notification_enabled?: boolean | null
         }
         Update: {
+          allergies?: string[] | null
           created_at?: string
           email?: string
           first_name?: string | null
           id?: string
+          monthly_budget?: number | null
           notification_advance_minutes?: number | null
           notification_enabled?: boolean | null
         }
