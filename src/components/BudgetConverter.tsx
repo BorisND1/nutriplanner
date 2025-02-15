@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Label } from "@/components/ui/label";
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { Skeleton } from "@/components/ui/skeleton";
-import { supabase } from "@/integrations/supabase/client";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useQuery } from "@tanstack/react-query";
 
 interface BudgetConverterProps {
@@ -15,15 +15,23 @@ interface BudgetConverterProps {
 
 export function BudgetConverter({ defaultBudget = 100, onBudgetChange }: BudgetConverterProps) {
   const [localBudget, setLocalBudget] = React.useState(defaultBudget);
+  const [inputCurrency, setInputCurrency] = React.useState<"EUR" | "LOCAL">("EUR");
   const { region, currencyInfo, loading: geoLoading } = useGeolocation();
 
   const { data: convertedBudget, isLoading: conversionLoading } = useQuery({
-    queryKey: ['convertBudget', localBudget, region],
+    queryKey: ['convertBudget', localBudget, region, inputCurrency],
     queryFn: async () => {
       if (!region || !currencyInfo) return localBudget;
 
       const { exchangeRateToEuro } = currencyInfo;
-      return (localBudget * exchangeRateToEuro).toFixed(2);
+      
+      if (inputCurrency === "EUR") {
+        // Convert from EUR to local currency
+        return (localBudget * exchangeRateToEuro).toFixed(2);
+      } else {
+        // Convert from local currency to EUR
+        return (localBudget / exchangeRateToEuro).toFixed(2);
+      }
     },
     enabled: !!region && !!currencyInfo,
   });
@@ -31,7 +39,12 @@ export function BudgetConverter({ defaultBudget = 100, onBudgetChange }: BudgetC
   const handleBudgetChange = (value: string) => {
     const numericValue = parseFloat(value) || 0;
     setLocalBudget(numericValue);
-    onBudgetChange?.(numericValue);
+    if (inputCurrency === "EUR") {
+      onBudgetChange?.(numericValue);
+    } else if (currencyInfo) {
+      // Convert local currency to EUR before calling onBudgetChange
+      onBudgetChange?.(numericValue / currencyInfo.exchangeRateToEuro);
+    }
   };
 
   const loading = geoLoading || conversionLoading;
@@ -41,12 +54,33 @@ export function BudgetConverter({ defaultBudget = 100, onBudgetChange }: BudgetC
       <CardHeader>
         <CardTitle>Votre budget</CardTitle>
         <CardDescription>
-          Définissez votre budget en euros, nous le convertirons automatiquement dans votre devise locale
+          Définissez votre budget dans votre devise préférée
         </CardDescription>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-6">
+        {region && currencyInfo && (
+          <RadioGroup
+            value={inputCurrency}
+            onValueChange={(value: "EUR" | "LOCAL") => setInputCurrency(value)}
+            className="flex space-x-4"
+          >
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="EUR" id="eur" />
+              <Label htmlFor="eur">Euros (€)</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <RadioGroupItem value="LOCAL" id="local" />
+              <Label htmlFor="local">{`Devise locale (${currencyInfo.currencySymbol})`}</Label>
+            </div>
+          </RadioGroup>
+        )}
+
         <div className="space-y-2">
-          <Label htmlFor="budget">Budget en euros (€)</Label>
+          <Label htmlFor="budget">
+            {inputCurrency === "EUR" 
+              ? "Budget en euros (€)" 
+              : `Budget en ${currencyInfo?.currencySymbol || ''}`}
+          </Label>
           <Input
             id="budget"
             type="number"
@@ -59,18 +93,29 @@ export function BudgetConverter({ defaultBudget = 100, onBudgetChange }: BudgetC
         </div>
 
         <div className="space-y-2">
-          <Label>Budget converti {region ? `(${currencyInfo?.currencySymbol})` : ''}</Label>
+          <Label>
+            {inputCurrency === "EUR" 
+              ? `Budget converti (${currencyInfo?.currencySymbol || ''})` 
+              : "Budget en euros (€)"}
+          </Label>
           {loading ? (
             <Skeleton className="h-9 w-full" />
           ) : (
             <div className="p-2 bg-muted rounded-md">
               <p className="text-lg font-medium">
-                {convertedBudget} {currencyInfo?.currencySymbol}
+                {convertedBudget} {inputCurrency === "EUR" ? currencyInfo?.currencySymbol : "€"}
                 {region && <span className="text-sm text-muted-foreground ml-2">({region})</span>}
               </p>
             </div>
           )}
         </div>
+
+        {currencyInfo?.exchange_rates_updated_at && (
+          <p className="text-sm text-muted-foreground">
+            Taux de change mis à jour le{" "}
+            {new Date(currencyInfo.exchange_rates_updated_at).toLocaleDateString()}
+          </p>
+        )}
       </CardContent>
     </Card>
   );
