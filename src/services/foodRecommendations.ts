@@ -1,11 +1,14 @@
-interface MacroTargets {
+import { supabase } from "@/integrations/supabase/client";
+import { MealSchedule } from "./mealSchedule";
+
+export interface MacroTargets {
   calories: number;
   protein: number;
   carbs: number;
   fats: number;
 }
 
-interface FoodItem {
+export interface FoodItem {
   name: string;
   category: string;
   pricePerKg: number;
@@ -378,9 +381,6 @@ const convertTimeToMinutes = (time: string): number => {
   const [hours, minutes] = time.split(':').map(Number);
   return hours * 60 + minutes;
 };
-
-import { supabase } from "@/integrations/supabase/client";
-import { generateMealSchedule, MealSchedule } from "./mealSchedule";
 
 export const generateCustomFoodList = async (
   age: number,

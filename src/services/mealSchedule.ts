@@ -1,5 +1,6 @@
+
 import { supabase } from "@/integrations/supabase/client";
-import { FoodItem } from "./foodRecommendations";
+import type { FoodItem } from "./foodRecommendations";
 
 interface MealTiming {
   mealName: string;
