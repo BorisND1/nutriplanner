@@ -9,6 +9,36 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      currency_by_region: {
+        Row: {
+          created_at: string
+          currency_code: string
+          currency_symbol: string
+          exchange_rate_to_euro: number
+          id: string
+          region: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          currency_code: string
+          currency_symbol: string
+          exchange_rate_to_euro: number
+          id?: string
+          region: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          currency_code?: string
+          currency_symbol?: string
+          exchange_rate_to_euro?: number
+          id?: string
+          region?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       food_by_region: {
         Row: {
           allergens: string[] | null
@@ -18,6 +48,7 @@ export type Database = {
           created_at: string
           fat_per_100g: number
           id: string
+          local_price_per_kg: number | null
           name: string
           price_per_kg: number
           protein_per_100g: number
@@ -32,6 +63,7 @@ export type Database = {
           created_at?: string
           fat_per_100g: number
           id?: string
+          local_price_per_kg?: number | null
           name: string
           price_per_kg: number
           protein_per_100g: number
@@ -46,6 +78,7 @@ export type Database = {
           created_at?: string
           fat_per_100g?: number
           id?: string
+          local_price_per_kg?: number | null
           name?: string
           price_per_kg?: number
           protein_per_100g?: number
@@ -187,6 +220,7 @@ export type Database = {
           name: string
           category: string
           price_per_kg: number
+          local_price_per_kg: number
           calories_per_100g: number
           protein_per_100g: number
           carbs_per_100g: number
@@ -203,6 +237,7 @@ export type Database = {
           name: string
           category: string
           price_per_kg: number
+          local_price_per_kg: number
           calories_per_100g: number
           protein_per_100g: number
           carbs_per_100g: number

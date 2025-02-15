@@ -26,7 +26,8 @@ serve(async (req) => {
       macroTargets,
       region,
       availableFoods,
-      economicAlternatives
+      economicAlternatives,
+      currencyInfo
     } = await req.json()
 
     const prompt = `En tant que nutritionniste expert, génère une liste d'aliments adaptée à ce profil et basée sur les aliments traditionnels de la région ${region} :
@@ -36,8 +37,9 @@ serve(async (req) => {
     - Niveau d'activité : ${activityLevel}
     - Objectif : ${goal}
     - Allergies : ${allergies.join(', ')}
-    - Budget mensuel : ${budget}€
+    - Budget mensuel : ${budget} ${currencyInfo.currencySymbol}
     - Région : ${region}
+    - Devise locale : ${currencyInfo.currencySymbol} (${currencyInfo.currencyCode})
     - Besoins quotidiens :
       * Calories : ${macroTargets.calories} kcal
       * Protéines : ${macroTargets.protein}g
@@ -51,6 +53,7 @@ serve(async (req) => {
     ${JSON.stringify(economicAlternatives, null, 2)}
 
     Privilégie les aliments traditionnels et facilement disponibles dans la région ${region}.
+    Les prix sont indiqués en ${currencyInfo.currencySymbol} (${currencyInfo.currencyCode}).
     Si le budget est limité, utilise les alternatives économiques proposées.
     Prends en compte les habitudes alimentaires locales et les préférences culturelles de la région.
     
@@ -58,7 +61,8 @@ serve(async (req) => {
     {
       name: string,
       category: string (une des catégories suivantes : "Protéines", "Céréales", "Légumineuses", "Matières grasses", "Produits laitiers", "Oléagineux", "Fruits", "Légumes"),
-      pricePerKg: number (prix moyen au kilo en euros),
+      pricePerKg: number (prix au kilo en ${currencyInfo.currencySymbol}),
+      localPricePerKg: number (prix local au kilo en ${currencyInfo.currencySymbol}),
       macros: {
         caloriesPer100g: number,
         proteinPer100g: number,

@@ -9,6 +9,7 @@ interface FoodItem {
   name: string;
   category: string;
   pricePerKg: number;
+  localPricePerKg: number;
   macros: {
     caloriesPer100g: number;
     proteinPer100g: number;
@@ -16,6 +17,7 @@ interface FoodItem {
     fatsPer100g: number;
   };
   allergenes: string[];
+  region: string;
 }
 
 const foodDatabase: FoodItem[] = [
@@ -23,6 +25,7 @@ const foodDatabase: FoodItem[] = [
     name: "Poulet (blanc)",
     category: "Protéines",
     pricePerKg: 10,
+    localPricePerKg: 10,
     macros: {
       caloriesPer100g: 165,
       proteinPer100g: 31,
@@ -35,6 +38,7 @@ const foodDatabase: FoodItem[] = [
     name: "Bœuf (steak haché 5%)",
     category: "Protéines",
     pricePerKg: 12,
+    localPricePerKg: 12,
     macros: {
       caloriesPer100g: 140,
       proteinPer100g: 27,
@@ -47,6 +51,7 @@ const foodDatabase: FoodItem[] = [
     name: "Saumon",
     category: "Protéines",
     pricePerKg: 20,
+    localPricePerKg: 20,
     macros: {
       caloriesPer100g: 208,
       proteinPer100g: 22,
@@ -59,6 +64,7 @@ const foodDatabase: FoodItem[] = [
     name: "Thon en conserve",
     category: "Protéines",
     pricePerKg: 15,
+    localPricePerKg: 15,
     macros: {
       caloriesPer100g: 116,
       proteinPer100g: 26,
@@ -71,6 +77,7 @@ const foodDatabase: FoodItem[] = [
     name: "Œufs",
     category: "Protéines",
     pricePerKg: 6,
+    localPricePerKg: 6,
     macros: {
       caloriesPer100g: 155,
       proteinPer100g: 13,
@@ -83,6 +90,7 @@ const foodDatabase: FoodItem[] = [
     name: "Tofu",
     category: "Protéines",
     pricePerKg: 8,
+    localPricePerKg: 8,
     macros: {
       caloriesPer100g: 76,
       proteinPer100g: 8,
@@ -95,6 +103,7 @@ const foodDatabase: FoodItem[] = [
     name: "Quinoa",
     category: "Céréales",
     pricePerKg: 6,
+    localPricePerKg: 6,
     macros: {
       caloriesPer100g: 120,
       proteinPer100g: 4.4,
@@ -107,6 +116,7 @@ const foodDatabase: FoodItem[] = [
     name: "Riz brun",
     category: "Céréales",
     pricePerKg: 3,
+    localPricePerKg: 3,
     macros: {
       caloriesPer100g: 111,
       proteinPer100g: 2.6,
@@ -119,6 +129,7 @@ const foodDatabase: FoodItem[] = [
     name: "Avoine",
     category: "Céréales",
     pricePerKg: 2.5,
+    localPricePerKg: 2.5,
     macros: {
       caloriesPer100g: 389,
       proteinPer100g: 16.9,
@@ -131,6 +142,7 @@ const foodDatabase: FoodItem[] = [
     name: "Pain complet",
     category: "Céréales",
     pricePerKg: 4,
+    localPricePerKg: 4,
     macros: {
       caloriesPer100g: 247,
       proteinPer100g: 13,
@@ -143,6 +155,7 @@ const foodDatabase: FoodItem[] = [
     name: "Patate douce",
     category: "Féculents",
     pricePerKg: 2.5,
+    localPricePerKg: 2.5,
     macros: {
       caloriesPer100g: 86,
       proteinPer100g: 1.6,
@@ -155,6 +168,7 @@ const foodDatabase: FoodItem[] = [
     name: "Yaourt grec",
     category: "Produits laitiers",
     pricePerKg: 4,
+    localPricePerKg: 4,
     macros: {
       caloriesPer100g: 97,
       proteinPer100g: 9,
@@ -167,6 +181,7 @@ const foodDatabase: FoodItem[] = [
     name: "Fromage blanc 0%",
     category: "Produits laitiers",
     pricePerKg: 3.5,
+    localPricePerKg: 3.5,
     macros: {
       caloriesPer100g: 71,
       proteinPer100g: 12,
@@ -179,6 +194,7 @@ const foodDatabase: FoodItem[] = [
     name: "Amandes",
     category: "Oléagineux",
     pricePerKg: 15,
+    localPricePerKg: 15,
     macros: {
       caloriesPer100g: 579,
       proteinPer100g: 21,
@@ -191,6 +207,7 @@ const foodDatabase: FoodItem[] = [
     name: "Graines de chia",
     category: "Oléagineux",
     pricePerKg: 18,
+    localPricePerKg: 18,
     macros: {
       caloriesPer100g: 486,
       proteinPer100g: 17,
@@ -203,6 +220,7 @@ const foodDatabase: FoodItem[] = [
     name: "Lentilles",
     category: "Légumineuses",
     pricePerKg: 3,
+    localPricePerKg: 3,
     macros: {
       caloriesPer100g: 116,
       proteinPer100g: 9,
@@ -215,6 +233,7 @@ const foodDatabase: FoodItem[] = [
     name: "Pois chiches",
     category: "Légumineuses",
     pricePerKg: 2.5,
+    localPricePerKg: 2.5,
     macros: {
       caloriesPer100g: 364,
       proteinPer100g: 19,
@@ -227,6 +246,7 @@ const foodDatabase: FoodItem[] = [
     name: "Huile d'olive",
     category: "Matières grasses",
     pricePerKg: 10,
+    localPricePerKg: 10,
     macros: {
       caloriesPer100g: 884,
       proteinPer100g: 0,
@@ -412,13 +432,20 @@ export const generateCustomFoodList = async (
   foodList: FoodItem[];
   recommendedMeals: "3" | "4" | "5" | "6";
   mealSchedule: MealSchedule[];
+  currencyInfo: CurrencyInfo;
 }> => {
   try {
-    // D'abord, récupérer les aliments filtrés par région et budget
+    // Récupérer les informations de devise pour la région
+    const currencyInfo = await getCurrencyInfo(region);
+    
+    // Convertir le budget en devise locale
+    const localBudget = budget * currencyInfo.exchangeRateToEuro;
+
+    // Récupérer les aliments filtrés par région et budget
     const { data: regionalFoods, error: dbError } = await supabase
       .rpc('get_foods_by_region_and_budget', {
         p_region: region,
-        p_budget: budget
+        p_budget: localBudget
       });
 
     if (dbError) {
@@ -431,7 +458,7 @@ export const generateCustomFoodList = async (
     const alternativesPromises = categories.map(category => 
       supabase.rpc('get_budget_alternatives', {
         p_region: region,
-        p_budget: budget * 0.7, // 70% du budget pour trouver des alternatives vraiment économiques
+        p_budget: localBudget * 0.7,
         p_category: category
       })
     );
@@ -444,13 +471,14 @@ export const generateCustomFoodList = async (
         name: food.name,
         category: food.category,
         pricePerKg: food.price_per_kg,
+        localPricePerKg: food.local_price_per_kg,
         macros: {
           caloriesPer100g: food.calories_per_100g,
           proteinPer100g: food.protein_per_100g,
           carbsPer100g: food.carbs_per_100g,
           fatsPer100g: food.fat_per_100g
         },
-        allergenes: [], // À compléter si nécessaire
+        allergenes: [],
         region: food.region
       }));
 
@@ -459,13 +487,14 @@ export const generateCustomFoodList = async (
       name: food.name,
       category: food.category,
       pricePerKg: food.price_per_kg,
+      localPricePerKg: food.local_price_per_kg,
       macros: {
         caloriesPer100g: food.calories_per_100g,
         proteinPer100g: food.protein_per_100g,
         carbsPer100g: food.carbs_per_100g,
         fatsPer100g: food.fat_per_100g
       },
-      allergenes: [], // À compléter si nécessaire
+      allergenes: [],
       region: food.region
     }));
 
@@ -474,7 +503,7 @@ export const generateCustomFoodList = async (
       !food.allergenes.some(allergene => allergies.includes(allergene))
     );
 
-    // Utiliser ces aliments filtrés avec l'API OpenAI pour obtenir des recommandations personnalisées
+    // Utiliser ces aliments filtrés avec l'API OpenAI
     const { data, error } = await supabase.functions.invoke('generate-food-list', {
       body: {
         age,
@@ -483,11 +512,12 @@ export const generateCustomFoodList = async (
         activityLevel,
         goal,
         allergies,
-        budget,
+        budget: localBudget,
         macroTargets,
         region,
         availableFoods: filteredFoods,
-        economicAlternatives // Ajouter les alternatives économiques
+        economicAlternatives,
+        currencyInfo
       }
     });
 
@@ -499,7 +529,6 @@ export const generateCustomFoodList = async (
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
 
-    // Générer le planning des repas
     const mealSchedule = generateMealSchedule(
       wakeUpTime,
       bedTime,
@@ -510,7 +539,8 @@ export const generateCustomFoodList = async (
     return {
       foodList: data.foodList,
       recommendedMeals,
-      mealSchedule
+      mealSchedule,
+      currencyInfo
     };
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
@@ -528,10 +558,42 @@ export const generateCustomFoodList = async (
       recommendedMealsNumber
     );
 
+    // Utiliser l'euro comme devise par défaut en cas d'erreur
+    const defaultCurrencyInfo: CurrencyInfo = {
+      currencyCode: 'EUR',
+      currencySymbol: '€',
+      exchangeRateToEuro: 1.0
+    };
+
     return {
       foodList: recommendations,
       recommendedMeals,
-      mealSchedule
+      mealSchedule,
+      currencyInfo: defaultCurrencyInfo
     };
   }
+};
+
+const getCurrencyInfo = async (region: string): Promise<CurrencyInfo> => {
+  const { data, error } = await supabase
+    .from('currency_by_region')
+    .select('currency_code, currency_symbol, exchange_rate_to_euro')
+    .eq('region', region)
+    .single();
+
+  if (error) {
+    console.error("Erreur lors de la récupération des informations de devise:", error);
+    // Valeurs par défaut pour l'euro
+    return {
+      currencyCode: 'EUR',
+      currencySymbol: '€',
+      exchangeRateToEuro: 1.0
+    };
+  }
+
+  return {
+    currencyCode: data.currency_code,
+    currencySymbol: data.currency_symbol,
+    exchangeRateToEuro: data.exchange_rate_to_euro
+  };
 };
