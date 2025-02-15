@@ -414,6 +414,39 @@ export const generateCustomFoodList = async (
   mealSchedule: MealSchedule[];
 }> => {
   try {
+    // D'abord, récupérer les aliments filtrés par région et budget
+    const { data: regionalFoods, error: dbError } = await supabase
+      .rpc('get_foods_by_region_and_budget', {
+        p_region: region,
+        p_budget: budget
+      });
+
+    if (dbError) {
+      console.error("Erreur lors de la récupération des aliments régionaux:", dbError);
+      throw new Error("Erreur lors de la récupération des aliments régionaux");
+    }
+
+    // Transformer les données pour correspondre à la structure FoodItem
+    const formattedFoods: FoodItem[] = regionalFoods.map(food => ({
+      name: food.name,
+      category: food.category,
+      pricePerKg: food.price_per_kg,
+      macros: {
+        caloriesPer100g: food.calories_per_100g,
+        proteinPer100g: food.protein_per_100g,
+        carbsPer100g: food.carbs_per_100g,
+        fatsPer100g: food.fat_per_100g
+      },
+      allergenes: [], // À compléter si nécessaire
+      region: food.region
+    }));
+
+    // Filtrer les aliments en fonction des allergies
+    const filteredFoods = formattedFoods.filter(food => 
+      !food.allergenes.some(allergene => allergies.includes(allergene))
+    );
+
+    // Utiliser ces aliments filtrés avec l'API OpenAI pour obtenir des recommandations personnalisées
     const { data, error } = await supabase.functions.invoke('generate-food-list', {
       body: {
         age,
@@ -424,7 +457,8 @@ export const generateCustomFoodList = async (
         allergies,
         budget,
         macroTargets,
-        region
+        region,
+        availableFoods: filteredFoods // Passer les aliments filtrés à la fonction
       }
     });
 
@@ -452,21 +486,12 @@ export const generateCustomFoodList = async (
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
     
-    // En cas d'erreur, effectuer une requête directe à la base de données
-    const { data: regionalFoods, error: dbError } = await supabase
-      .from('food_by_region')
-      .select('*')
-      .eq('region', region)
-      .limit(15);
-
-    if (dbError) {
-      console.error("Erreur lors de la récupération des aliments régionaux:", dbError);
-    }
-
+    // Fallback : utiliser la fonction de recommandation statique
+    const { recommendations } = generateFoodRecommendations(macroTargets, allergies, budget);
+    
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
     
-    // Générer le planning des repas même en cas d'erreur
     const mealSchedule = generateMealSchedule(
       wakeUpTime,
       bedTime,
@@ -474,22 +499,8 @@ export const generateCustomFoodList = async (
       recommendedMealsNumber
     );
 
-    // Si nous avons des aliments régionaux, les utiliser, sinon utiliser la liste statique
     return {
-      foodList: regionalFoods && regionalFoods.length > 0 
-        ? regionalFoods.map(food => ({
-            name: food.name,
-            category: food.category,
-            pricePerKg: food.price_per_kg,
-            macros: {
-              caloriesPer100g: food.calories_per_100g,
-              proteinPer100g: food.protein_per_100g,
-              carbsPer100g: food.carbs_per_100g,
-              fatsPer100g: food.fat_per_100g
-            },
-            allergenes: food.allergens
-          }))
-        : generateFoodRecommendations(macroTargets, allergies, budget).recommendations,
+      foodList: recommendations,
       recommendedMeals,
       mealSchedule
     };

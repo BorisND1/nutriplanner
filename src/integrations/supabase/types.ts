@@ -177,7 +177,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_foods_by_region_and_budget: {
+        Args: {
+          p_region: string
+          p_budget: number
+        }
+        Returns: {
+          name: string
+          category: string
+          price_per_kg: number
+          calories_per_100g: number
+          protein_per_100g: number
+          carbs_per_100g: number
+          fat_per_100g: number
+          region: string
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never
