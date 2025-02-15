@@ -49,6 +49,16 @@ interface FoodItem {
   allergenes: string[];
 }
 
+const REGIONS = [
+  { value: "Europe", label: "Europe" },
+  { value: "Afrique", label: "Afrique" },
+  { value: "Asie", label: "Asie" },
+  { value: "Amérique du Nord", label: "Amérique du Nord" },
+  { value: "Amérique du Sud", label: "Amérique du Sud" },
+  { value: "Océanie", label: "Océanie" },
+  { value: "Moyen-Orient", label: "Moyen-Orient" }
+] as const;
+
 const profileFormSchema = z.object({
   age: z.string().min(1, "L'âge est requis").transform(Number),
   weight: z.string().min(1, "Le poids est requis").transform(Number),
@@ -108,6 +118,7 @@ const profileFormSchema = z.object({
       "travail_weekend"
     ])).default([])
   }).optional(),
+  region: z.enum(["Europe", "Afrique", "Asie", "Amérique du Nord", "Amérique du Sud", "Océanie", "Moyen-Orient"]),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;

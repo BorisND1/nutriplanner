@@ -406,7 +406,8 @@ export const generateCustomFoodList = async (
   budget: number,
   macroTargets: MacroTargets,
   wakeUpTime: string,
-  bedTime: string
+  bedTime: string,
+  region: string
 ): Promise<{
   foodList: FoodItem[];
   recommendedMeals: "3" | "4" | "5" | "6";
@@ -422,7 +423,8 @@ export const generateCustomFoodList = async (
         goal,
         allergies,
         budget,
-        macroTargets
+        macroTargets,
+        region
       }
     });
 
@@ -449,7 +451,18 @@ export const generateCustomFoodList = async (
     };
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
-    // En cas d'erreur, on retourne la liste statique et un nombre de repas calculé
+    
+    // En cas d'erreur, effectuer une requête directe à la base de données
+    const { data: regionalFoods, error: dbError } = await supabase
+      .from('food_by_region')
+      .select('*')
+      .eq('region', region)
+      .limit(15);
+
+    if (dbError) {
+      console.error("Erreur lors de la récupération des aliments régionaux:", dbError);
+    }
+
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
     
@@ -461,8 +474,22 @@ export const generateCustomFoodList = async (
       recommendedMealsNumber
     );
 
+    // Si nous avons des aliments régionaux, les utiliser, sinon utiliser la liste statique
     return {
-      foodList: generateFoodRecommendations(macroTargets, allergies, budget).recommendations,
+      foodList: regionalFoods && regionalFoods.length > 0 
+        ? regionalFoods.map(food => ({
+            name: food.name,
+            category: food.category,
+            pricePerKg: food.price_per_kg,
+            macros: {
+              caloriesPer100g: food.calories_per_100g,
+              proteinPer100g: food.protein_per_100g,
+              carbsPer100g: food.carbs_per_100g,
+              fatsPer100g: food.fat_per_100g
+            },
+            allergenes: food.allergens
+          }))
+        : generateFoodRecommendations(macroTargets, allergies, budget).recommendations,
       recommendedMeals,
       mealSchedule
     };

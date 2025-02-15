@@ -23,7 +23,8 @@ serve(async (req) => {
       goal, 
       allergies, 
       budget,
-      macroTargets 
+      macroTargets,
+      region
     } = await req.json()
 
     const prompt = `En tant que nutritionniste expert, génère une liste d'aliments adaptée à ce profil :
@@ -34,6 +35,7 @@ serve(async (req) => {
     - Objectif : ${goal}
     - Allergies : ${allergies.join(', ')}
     - Budget mensuel : ${budget}€
+    - Région : ${region}
     - Besoins quotidiens :
       * Calories : ${macroTargets.calories} kcal
       * Protéines : ${macroTargets.protein}g
@@ -43,7 +45,7 @@ serve(async (req) => {
     Retourne une liste d'aliments au format JSON avec cette structure exacte pour chaque aliment :
     {
       name: string,
-      category: string (une des catégories suivantes : "Protéines", "Céréales", "Légumineuses", "Matières grasses", "Produits laitiers", "Oléagineux"),
+      category: string (une des catégories suivantes : "Protéines", "Céréales", "Légumineuses", "Matières grasses", "Produits laitiers", "Oléagineux", "Fruits", "Légumes"),
       pricePerKg: number (prix moyen au kilo en euros),
       macros: {
         caloriesPer100g: number,
@@ -51,16 +53,18 @@ serve(async (req) => {
         carbsPer100g: number,
         fatsPer100g: number
       },
-      allergenes: string[] (liste des allergènes potentiels)
+      allergenes: string[],
+      region: string
     }
 
     Inclure uniquement des aliments qui :
     1. Respectent les contraintes d'allergies mentionnées
     2. Sont adaptés au budget indiqué
     3. Aident à atteindre les objectifs nutritionnels
-    4. Sont facilement trouvables en supermarché
+    4. Sont facilement trouvables dans la région ${region}
+    5. Sont culturellement appropriés pour la région
 
-    Retourne exactement 15 aliments.`
+    Retourne exactement 15 aliments typiques de la région.`
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -69,9 +73,9 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini',
+        model: 'gpt-4',
         messages: [
-          { role: 'system', content: "Tu es un expert en nutrition qui génère des listes d'aliments personnalisées au format JSON." },
+          { role: 'system', content: "Tu es un expert en nutrition qui génère des listes d'aliments personnalisées au format JSON, spécialisé dans les régimes alimentaires régionaux." },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
@@ -84,7 +88,6 @@ serve(async (req) => {
     try {
       foodList = JSON.parse(data.choices[0].message.content)
     } catch (e) {
-      // Si le parsing JSON échoue, on utilise une regex pour extraire le JSON
       const jsonMatch = data.choices[0].message.content.match(/\[[\s\S]*\]/)
       if (jsonMatch) {
         foodList = JSON.parse(jsonMatch[0])

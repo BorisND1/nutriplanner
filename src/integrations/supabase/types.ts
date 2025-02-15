@@ -9,6 +9,51 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      food_by_region: {
+        Row: {
+          allergens: string[] | null
+          calories_per_100g: number
+          carbs_per_100g: number
+          category: string
+          created_at: string
+          fat_per_100g: number
+          id: string
+          name: string
+          price_per_kg: number
+          protein_per_100g: number
+          region: string
+          seasonal_availability: string[] | null
+        }
+        Insert: {
+          allergens?: string[] | null
+          calories_per_100g: number
+          carbs_per_100g: number
+          category: string
+          created_at?: string
+          fat_per_100g: number
+          id?: string
+          name: string
+          price_per_kg: number
+          protein_per_100g: number
+          region: string
+          seasonal_availability?: string[] | null
+        }
+        Update: {
+          allergens?: string[] | null
+          calories_per_100g?: number
+          carbs_per_100g?: number
+          category?: string
+          created_at?: string
+          fat_per_100g?: number
+          id?: string
+          name?: string
+          price_per_kg?: number
+          protein_per_100g?: number
+          region?: string
+          seasonal_availability?: string[] | null
+        }
+        Relationships: []
+      }
       meal_notifications: {
         Row: {
           created_at: string
@@ -101,6 +146,7 @@ export type Database = {
           monthly_budget: number | null
           notification_advance_minutes: number | null
           notification_enabled: boolean | null
+          region: string | null
         }
         Insert: {
           allergies?: string[] | null
@@ -111,6 +157,7 @@ export type Database = {
           monthly_budget?: number | null
           notification_advance_minutes?: number | null
           notification_enabled?: boolean | null
+          region?: string | null
         }
         Update: {
           allergies?: string[] | null
@@ -121,6 +168,7 @@ export type Database = {
           monthly_budget?: number | null
           notification_advance_minutes?: number | null
           notification_enabled?: boolean | null
+          region?: string | null
         }
         Relationships: []
       }
