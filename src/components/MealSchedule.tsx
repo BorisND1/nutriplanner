@@ -3,18 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { CustomMealSchedule, FoodItem, getAdaptedRecommendations, getMealScheduleForDate, saveMealSchedule } from "@/services/mealSchedule";
+import { CustomMealSchedule, FoodItem, MealSchedule as MealScheduleType, getAdaptedRecommendations, getMealScheduleForDate, saveMealSchedule } from "@/services/mealSchedule";
 
 interface MealScheduleProps {
-  schedule: {
-    mealName: string;
-    scheduledTime: string;
-    flexibilityBefore: string;
-    flexibilityAfter: string;
-    complexity: "simple" | "moderate" | "elaborate";
-    isPackable: boolean;
-    suggestedFoods?: FoodItem[];
-  }[];
+  schedule: MealScheduleType[];
   recommendations: FoodItem[];
 }
 
