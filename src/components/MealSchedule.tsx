@@ -1,7 +1,9 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MealSchedule as MealScheduleType } from "@/services/mealSchedule";
 import { PackageOpen, Clock, ChefHat } from "lucide-react";
+import { MealScheduleEdit } from "./MealScheduleEdit";
+import { saveMealSchedule, getMealScheduleForDate, type CustomMealSchedule } from "@/services/mealSchedule";
+import { useEffect, useState } from "react";
 
 interface MealScheduleProps {
   schedule: MealScheduleType[];
@@ -118,7 +120,26 @@ const distributeFoodByMeal = (
 };
 
 export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
+  const [customSchedules, setCustomSchedules] = useState<CustomMealSchedule[]>([]);
+  const [currentDate] = useState(new Date().toISOString().split('T')[0]);
   const foodByMeal = distributeFoodByMeal(recommendations, schedule.length, schedule);
+
+  useEffect(() => {
+    // Sauvegarder le planning initial
+    saveMealSchedule(schedule, currentDate).catch(console.error);
+    
+    // Charger les plannings personnalisés
+    loadCustomSchedules();
+  }, [schedule, currentDate]);
+
+  const loadCustomSchedules = async () => {
+    try {
+      const customSchedules = await getMealScheduleForDate(currentDate);
+      setCustomSchedules(customSchedules);
+    } catch (error) {
+      console.error("Erreur lors du chargement des plannings personnalisés:", error);
+    }
+  };
 
   const getComplexityLabel = (complexity: "simple" | "moderate" | "elaborate") => {
     switch (complexity) {
@@ -153,49 +174,65 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {schedule.map((meal, index) => (
-            <div key={index} className="flex flex-col space-y-2 p-4 rounded-lg bg-secondary/10">
-              <div className="flex justify-between items-center">
-                <h3 className="font-medium text-lg">{meal.mealName}</h3>
-                <span className="font-bold text-xl">{meal.scheduledTime}</span>
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Plage horaire flexible : {meal.flexibilityBefore} - {meal.flexibilityAfter}
-              </div>
-              
-              <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
-                <span className="flex items-center">
-                  {getComplexityIcon(meal.complexity)}
-                  {getComplexityLabel(meal.complexity)}
-                </span>
-                {meal.isPackable && (
-                  <span className="flex items-center">
-                    <PackageOpen className="w-4 h-4 inline-block mr-2" />
-                    À emporter possible
-                  </span>
-                )}
-              </div>
-              
-              {/* Affichage des aliments recommandés pour ce repas */}
-              {foodByMeal[index].length > 0 && (
-                <div className="mt-2 space-y-2">
-                  <h4 className="text-sm font-medium text-foreground">Aliments suggérés :</h4>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                    {foodByMeal[index].map((food, foodIndex) => (
-                      <div key={foodIndex} className="bg-background/50 p-3 rounded-lg text-sm">
-                        <div className="font-medium">{food.name}</div>
-                        <div className="text-xs text-muted-foreground mt-1">
-                          <div>Calories : {food.macros.caloriesPer100g} kcal/100g</div>
-                          <div>Protéines : {food.macros.proteinPer100g}g/100g</div>
-                          <div>Prix : {food.pricePerKg}€/kg</div>
-                        </div>
-                      </div>
-                    ))}
+          {schedule.map((meal, index) => {
+            const customSchedule = customSchedules.find(
+              cs => cs.originalMealName === meal.mealName
+            );
+            
+            return (
+              <div key={index} className="flex flex-col space-y-2 p-4 rounded-lg bg-secondary/10">
+                <div className="flex justify-between items-center">
+                  <h3 className="font-medium text-lg">
+                    {customSchedule?.customMealName || meal.mealName}
+                  </h3>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-xl">
+                      {customSchedule?.customTime || meal.scheduledTime}
+                    </span>
+                    <MealScheduleEdit
+                      meal={meal}
+                      customSchedule={customSchedule}
+                      onUpdate={loadCustomSchedules}
+                    />
                   </div>
                 </div>
-              )}
-            </div>
-          ))}
+                <div className="text-sm text-muted-foreground">
+                  Plage horaire flexible : {meal.flexibilityBefore} - {meal.flexibilityAfter}
+                </div>
+                
+                <div className="flex items-center gap-4 text-sm text-muted-foreground mt-1">
+                  <span className="flex items-center">
+                    {getComplexityIcon(meal.complexity)}
+                    {getComplexityLabel(meal.complexity)}
+                  </span>
+                  {meal.isPackable && (
+                    <span className="flex items-center">
+                      <PackageOpen className="w-4 h-4 inline-block mr-2" />
+                      À emporter possible
+                    </span>
+                  )}
+                </div>
+                
+                {foodByMeal[index].length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    <h4 className="text-sm font-medium text-foreground">Aliments suggérés :</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+                      {foodByMeal[index].map((food, foodIndex) => (
+                        <div key={foodIndex} className="bg-background/50 p-3 rounded-lg text-sm">
+                          <div className="font-medium">{food.name}</div>
+                          <div className="text-xs text-muted-foreground mt-1">
+                            <div>Calories : {food.macros.caloriesPer100g} kcal/100g</div>
+                            <div>Protéines : {food.macros.proteinPer100g}g/100g</div>
+                            <div>Prix : {food.pricePerKg}€/kg</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </CardContent>
     </Card>

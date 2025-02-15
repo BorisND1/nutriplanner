@@ -1,4 +1,3 @@
-
 interface MealTiming {
   mealName: string;
   idealTimeOffset: number; // minutes après le réveil
@@ -158,4 +157,111 @@ export const generateMealSchedule = (
       isPackable: timing.isPackable
     };
   });
+};
+
+export interface CustomMealSchedule {
+  id: string;
+  originalMealName: string;
+  customMealName?: string;
+  scheduledTime: string;
+  customTime?: string;
+  mealType: "petit-dejeuner" | "collation" | "dejeuner" | "diner";
+  isAlternative: boolean;
+  date: string;
+}
+
+export const saveMealSchedule = async (schedule: MealSchedule[], date: string) => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Utilisateur non connecté");
+
+  const mealSchedules = schedule.map(meal => ({
+    user_id: user.id,
+    original_meal_name: meal.mealName,
+    scheduled_time: meal.scheduledTime,
+    meal_type: getMealType(meal.mealName),
+    date: date,
+  }));
+
+  const { error } = await supabase
+    .from('meal_schedules')
+    .upsert(mealSchedules, { onConflict: 'user_id,date,original_meal_name' });
+
+  if (error) throw error;
+};
+
+export const updateMealSchedule = async (mealId: string, updates: Partial<CustomMealSchedule>) => {
+  const { error } = await supabase
+    .from('meal_schedules')
+    .update({
+      custom_meal_name: updates.customMealName,
+      custom_time: updates.customTime,
+      is_alternative: updates.isAlternative,
+    })
+    .eq('id', mealId);
+
+  if (error) throw error;
+};
+
+export const getMealScheduleForDate = async (date: string): Promise<CustomMealSchedule[]> => {
+  const { data, error } = await supabase
+    .from('meal_schedules')
+    .select('*')
+    .eq('date', date)
+    .order('scheduled_time');
+
+  if (error) throw error;
+  return data.map(meal => ({
+    id: meal.id,
+    originalMealName: meal.original_meal_name,
+    customMealName: meal.custom_meal_name,
+    scheduledTime: meal.scheduled_time,
+    customTime: meal.custom_time,
+    mealType: meal.meal_type,
+    isAlternative: meal.is_alternative,
+    date: meal.date,
+  }));
+};
+
+const getMealType = (mealName: string): "petit-dejeuner" | "collation" | "dejeuner" | "diner" => {
+  const name = mealName.toLowerCase();
+  if (name.includes("petit-déjeuner")) return "petit-dejeuner";
+  if (name.includes("collation")) return "collation";
+  if (name.includes("déjeuner")) return "dejeuner";
+  return "diner";
+};
+
+export const generateQuickAlternatives = (meal: MealSchedule): MealSchedule[] => {
+  const quickAlternatives: MealSchedule[] = [];
+  
+  // Alternative rapide pour le petit-déjeuner
+  if (meal.mealName.toLowerCase().includes("petit-déjeuner")) {
+    quickAlternatives.push({
+      ...meal,
+      mealName: "Petit-déjeuner express",
+      complexity: "simple",
+      isPackable: true,
+    });
+  }
+  
+  // Alternative rapide pour le déjeuner
+  if (meal.mealName.toLowerCase().includes("déjeuner")) {
+    quickAlternatives.push({
+      ...meal,
+      mealName: "Déjeuner sur le pouce",
+      complexity: "simple",
+      isPackable: true,
+    });
+  }
+  
+  // Alternative rapide pour le dîner
+  if (meal.mealName.toLowerCase().includes("dîner")) {
+    quickAlternatives.push({
+      ...meal,
+      mealName: "Dîner express",
+      complexity: "simple",
+      isPackable: true,
+    });
+  }
+
+  return quickAlternatives;
 };

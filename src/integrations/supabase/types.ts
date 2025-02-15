@@ -44,6 +44,53 @@ export type Database = {
           },
         ]
       }
+      meal_schedules: {
+        Row: {
+          created_at: string | null
+          custom_meal_name: string | null
+          custom_time: string | null
+          date: string
+          id: string
+          is_alternative: boolean | null
+          meal_type: string
+          original_meal_name: string
+          scheduled_time: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          custom_meal_name?: string | null
+          custom_time?: string | null
+          date: string
+          id?: string
+          is_alternative?: boolean | null
+          meal_type: string
+          original_meal_name: string
+          scheduled_time: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          custom_meal_name?: string | null
+          custom_time?: string | null
+          date?: string
+          id?: string
+          is_alternative?: boolean | null
+          meal_type?: string
+          original_meal_name?: string
+          scheduled_time?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "meal_schedules_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
