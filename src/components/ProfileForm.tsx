@@ -146,6 +146,24 @@ const allergiesList = [
   { value: "moutarde", label: "Moutarde", description: "Alternatives : curcuma, gingembre" }
 ];
 
+const WORK_DAYS = [
+  "lundi",
+  "mardi",
+  "mercredi",
+  "jeudi",
+  "vendredi",
+  "samedi",
+  "dimanche"
+] as const;
+
+const ADDITIONAL_CONSTRAINTS = [
+  { value: "deplacements_frequents" as const, label: "Déplacements fréquents" },
+  { value: "teletravail" as const, label: "Télétravail" },
+  { value: "horaires_variables" as const, label: "Horaires variables" },
+  { value: "reunions_frequentes" as const, label: "Réunions fréquentes" },
+  { value: "travail_weekend" as const, label: "Travail le weekend occasionnel" }
+] as const;
+
 export function ProfileForm() {
   const { toast } = useToast();
   const [mealScheduleData, setMealScheduleData] = useState<MealScheduleType[] | null>(null);
@@ -505,7 +523,7 @@ export function ProfileForm() {
                 <FormLabel>Jours travaillés</FormLabel>
                 <FormControl>
                   <div className="flex flex-wrap gap-2">
-                    {["lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi", "dimanche"].map((day) => (
+                    {WORK_DAYS.map((day) => (
                       <div
                         key={day}
                         className={`px-4 py-2 rounded-full cursor-pointer transition-colors ${
@@ -639,13 +657,7 @@ export function ProfileForm() {
                 </FormDescription>
                 <FormControl>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                    {[
-                      { value: "deplacements_frequents", label: "Déplacements fréquents" },
-                      { value: "teletravail", label: "Télétravail" },
-                      { value: "horaires_variables", label: "Horaires variables" },
-                      { value: "reunions_frequentes", label: "Réunions fréquentes" },
-                      { value: "travail_weekend", label: "Travail le weekend occasionnel" }
-                    ].map((constraint) => (
+                    {ADDITIONAL_CONSTRAINTS.map((constraint) => (
                       <div
                         key={constraint.value}
                         className={`p-4 rounded-lg border cursor-pointer transition-colors ${
