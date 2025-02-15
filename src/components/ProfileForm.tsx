@@ -740,7 +740,8 @@ export function ProfileForm() {
               <CardContent>
                 <div className="space-y-6">
                   {["Protéines", "Céréales", "Légumineuses", "Matières grasses"].map(category => {
-                    const categoryFoods = form.watch("recommendations")?.filter(food => food.category === category);
+                    const recommendations = form.watch("recommendations") || [];
+                    const categoryFoods = recommendations.filter(food => food.category === category);
                     if (!categoryFoods?.length) return null;
                     
                     return (
