@@ -210,7 +210,8 @@ export function ProfileForm() {
       data.monthlyBudget,
       macroTargets,
       data.wakeUpTime,
-      data.bedTime
+      data.bedTime,
+      data.region
     );
 
     // Mise à jour automatique du nombre de repas recommandé
