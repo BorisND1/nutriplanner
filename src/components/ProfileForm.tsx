@@ -28,6 +28,7 @@ import { MealSchedule } from "./MealSchedule";
 import type { MealSchedule as MealScheduleType } from "@/services/mealSchedule";
 import { NotificationPreferences } from "./NotificationPreferences";
 import { Switch } from "@/components/ui/switch";
+import { RegionSelector, REGIONS } from "./RegionSelector";
 
 interface MacroTargets {
   calories: number;
@@ -694,6 +695,11 @@ export function ProfileForm() {
             )}
           />
         </div>
+
+        <RegionSelector 
+          control={form.control}
+          name="region"
+        />
 
         <div className="mt-8 space-y-4">
           <Card>
