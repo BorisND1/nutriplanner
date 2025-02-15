@@ -7,6 +7,7 @@ import { CustomMealSchedule, MealSchedule as MealScheduleType, getAdaptedRecomme
 import type { FoodItem } from "@/services/foodRecommendations";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { toast } from "sonner";
 
 interface MealScheduleProps {
   schedule: MealScheduleType[];
@@ -20,6 +21,7 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
   const [selectedComplexity, setSelectedComplexity] = useState<string | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedMealName, setSelectedMealName] = useState<string>("");
+  const [mealSuggestions, setMealSuggestions] = useState<{ [key: string]: FoodItem[] }>({});
 
   useEffect(() => {
     saveMealSchedule(schedule, currentDate).catch(console.error);
@@ -42,11 +44,17 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
     setSelectedComplexity(complexity);
     setSelectedMealName(mealName);
     setIsDialogOpen(true);
+
+    const filteredFoods = getFilteredRecommendations(complexity);
+    setMealSuggestions(prev => ({
+      ...prev,
+      [mealName]: filteredFoods.slice(0, 4)
+    }));
+
+    toast.success(`Suggestions de repas ${complexity === "simple" ? "rapides" : complexity === "moderate" ? "modérés" : "élaborés"} mises à jour`);
   };
 
-  const getFilteredRecommendations = () => {
-    if (!selectedComplexity) return [];
-
+  const getFilteredRecommendations = (complexity: string) => {
     const complexityToTime = {
       simple: 15,
       moderate: 30,
@@ -55,7 +63,7 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
 
     return adaptedRecommendations.filter(food => {
       const preparationTime = Math.floor(food.pricePerKg / 10); // Estimation simplifiée du temps de préparation
-      const maxTime = complexityToTime[selectedComplexity as keyof typeof complexityToTime];
+      const maxTime = complexityToTime[complexity as keyof typeof complexityToTime];
       return preparationTime <= maxTime;
     });
   };
@@ -73,6 +81,7 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
               const customSchedule = customSchedules.find(
                 cs => cs.originalMealName === meal.mealName
               );
+              const suggestedFoods = mealSuggestions[meal.mealName] || meal.suggestedFoods;
               
               return (
                 <div key={index} className="flex flex-col space-y-2 p-4 rounded-lg bg-secondary/10">
@@ -81,11 +90,11 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
                     Prévu à {meal.scheduledTime} ({meal.flexibilityBefore} - {meal.flexibilityAfter})
                   </p>
                   
-                  {meal.suggestedFoods && meal.suggestedFoods.length > 0 ? (
+                  {suggestedFoods && suggestedFoods.length > 0 ? (
                     <div className="mt-2">
                       <h4 className="text-sm font-medium mb-2">Aliments recommandés :</h4>
                       <div className="flex flex-wrap gap-2">
-                        {meal.suggestedFoods.map((food, idx) => (
+                        {suggestedFoods.map((food, idx) => (
                           <Badge key={idx} variant="secondary" className="text-xs">
                             {food.name} - {food.macros.proteinPer100g}g prot/100g
                           </Badge>
@@ -143,7 +152,7 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
-            {getFilteredRecommendations().map((food, index) => (
+            {getFilteredRecommendations(selectedComplexity || "simple").map((food, index) => (
               <div key={index} className="flex items-center justify-between p-2 rounded-lg bg-secondary/10">
                 <div>
                   <h4 className="font-medium">{food.name}</h4>
@@ -154,7 +163,7 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
                 <Badge>{food.category}</Badge>
               </div>
             ))}
-            {getFilteredRecommendations().length === 0 && (
+            {getFilteredRecommendations(selectedComplexity || "simple").length === 0 && (
               <p className="text-center text-muted-foreground">
                 Aucun aliment trouvé pour ce niveau de complexité
               </p>
