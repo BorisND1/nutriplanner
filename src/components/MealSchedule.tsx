@@ -1,5 +1,8 @@
+
 import React, { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
 import { CustomMealSchedule, FoodItem, getAdaptedRecommendations, getMealScheduleForDate, saveMealSchedule } from "@/services/mealSchedule";
 
 interface MealScheduleProps {
@@ -10,18 +13,10 @@ interface MealScheduleProps {
     flexibilityAfter: string;
     complexity: "simple" | "moderate" | "elaborate";
     isPackable: boolean;
+    suggestedFoods?: FoodItem[];
   }[];
   recommendations: FoodItem[];
 }
-
-const foodByMeal: { [mealName: string]: string[] } = {
-  "Petit-déjeuner": ["Œufs", "Avoine", "Yaourt grec", "Amandes"],
-  "Collation matinale": ["Amandes", "Graines de chia", "Fromage blanc 0%"],
-  "Déjeuner": ["Poulet (blanc)", "Quinoa", "Lentilles", "Huile d'olive"],
-  "Collation après-midi": ["Amandes", "Fromage blanc 0%", "Graines de chia"],
-  "Dîner": ["Saumon", "Riz brun", "Lentilles", "Huile d'olive"],
-  "Collation nocturne": ["Yaourt grec", "Amandes"]
-};
 
 export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
   const [customSchedules, setCustomSchedules] = useState<CustomMealSchedule[]>([]);
@@ -29,13 +24,8 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
   const [currentDate] = useState(new Date().toISOString().split('T')[0]);
 
   useEffect(() => {
-    // Sauvegarder le planning initial et configurer les notifications
     saveMealSchedule(schedule, currentDate).catch(console.error);
-    
-    // Charger les plannings personnalisés
     loadCustomSchedules();
-
-    // Adapter les recommandations aux contraintes de l'utilisateur
     getAdaptedRecommendations(recommendations)
       .then(setAdaptedRecommendations)
       .catch(console.error);
@@ -63,11 +53,6 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
               cs => cs.originalMealName === meal.mealName
             );
             
-            // Filtrer les recommandations adaptées pour ce repas
-            const mealRecommendations = adaptedRecommendations.filter(food => 
-              foodByMeal[meal.mealName]?.includes(food.name)
-            );
-            
             return (
               <div key={index} className="flex flex-col space-y-2 p-4 rounded-lg bg-secondary/10">
                 <h3 className="text-lg font-semibold">{meal.mealName}</h3>
@@ -75,28 +60,35 @@ export function MealSchedule({ schedule, recommendations }: MealScheduleProps) {
                   Prévu à {meal.scheduledTime} ({meal.flexibilityBefore} - {meal.flexibilityAfter})
                 </p>
                 
-                {mealRecommendations.length === 0 && (
-                  <div className="text-sm text-muted-foreground mt-2">
-                    Aucune recommandation disponible compte tenu de vos contraintes.
-                    Consultez un nutritionniste pour des alternatives adaptées.
-                  </div>
-                )}
-                
-                {mealRecommendations.length > 0 && (
+                {meal.suggestedFoods && meal.suggestedFoods.length > 0 ? (
                   <div className="mt-2">
                     <h4 className="text-sm font-medium mb-2">Aliments recommandés :</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
-                      {mealRecommendations.map((food, idx) => (
-                        <div key={idx} className="text-sm p-2 bg-background rounded-md">
-                          <span className="font-medium">{food.name}</span>
-                          <div className="text-muted-foreground">
-                            {food.pricePerKg}€/kg - {food.macros.proteinPer100g}g protéines/100g
-                          </div>
-                        </div>
+                    <div className="flex flex-wrap gap-2">
+                      {meal.suggestedFoods.map((food, idx) => (
+                        <Badge key={idx} variant="secondary" className="text-xs">
+                          {food.name} - {food.macros.proteinPer100g}g prot/100g
+                        </Badge>
                       ))}
                     </div>
                   </div>
+                ) : (
+                  <div className="text-sm text-muted-foreground mt-2">
+                    Consultez la liste complète des aliments recommandés pour des suggestions
+                  </div>
                 )}
+
+                <Separator className="my-2" />
+                
+                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                  <Badge variant={meal.complexity === "simple" ? "default" : "secondary"}>
+                    {meal.complexity === "simple" ? "Rapide" : meal.complexity === "moderate" ? "Modéré" : "Élaboré"}
+                  </Badge>
+                  {meal.isPackable && (
+                    <Badge variant="outline">
+                      Transportable
+                    </Badge>
+                  )}
+                </div>
               </div>
             );
           })}

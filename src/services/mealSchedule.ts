@@ -1,35 +1,141 @@
-
 import { supabase } from "@/integrations/supabase/client";
+import { FoodItem } from "./foodRecommendations";
 
 interface MealTiming {
   mealName: string;
-  idealTimeOffset: number; // minutes après le réveil
-  flexibilityRange: number; // minutes de flexibilité avant/après
+  idealTimeOffset: number;
+  flexibilityRange: number;
   complexity: "simple" | "moderate" | "elaborate";
-  isPackable: boolean; // indique si le repas peut être préparé à l'avance et emporté
+  isPackable: boolean;
+  suggestedFoodCategories: string[];
 }
 
 const mealTimingsByGoal: { [key: string]: MealTiming[] } = {
   perte_poids: [
-    { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "simple", isPackable: false },
-    { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
-    { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true },
-    { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "moderate", isPackable: false }
+    { 
+      mealName: "Petit-déjeuner", 
+      idealTimeOffset: 30, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: false,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers", "Oléagineux"]
+    },
+    { 
+      mealName: "Déjeuner", 
+      idealTimeOffset: 360, 
+      flexibilityRange: 45, 
+      complexity: "moderate", 
+      isPackable: true,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
+    },
+    { 
+      mealName: "Collation après-midi", 
+      idealTimeOffset: 540, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: true,
+      suggestedFoodCategories: ["Produits laitiers", "Oléagineux", "Protéines"]
+    },
+    { 
+      mealName: "Dîner", 
+      idealTimeOffset: 720, 
+      flexibilityRange: 45, 
+      complexity: "moderate", 
+      isPackable: false,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
+    }
   ],
   seche: [
-    { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "moderate", isPackable: false },
-    { mealName: "Collation matinale", idealTimeOffset: 180, flexibilityRange: 30, complexity: "simple", isPackable: true },
-    { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
-    { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true },
-    { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "elaborate", isPackable: false }
+    { 
+      mealName: "Petit-déjeuner", 
+      idealTimeOffset: 30, 
+      flexibilityRange: 30, 
+      complexity: "moderate", 
+      isPackable: false,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers"]
+    },
+    { 
+      mealName: "Collation matinale", 
+      idealTimeOffset: 180, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: true,
+      suggestedFoodCategories: ["Protéines", "Oléagineux"]
+    },
+    { 
+      mealName: "Déjeuner", 
+      idealTimeOffset: 360, 
+      flexibilityRange: 45, 
+      complexity: "moderate", 
+      isPackable: true,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
+    },
+    { 
+      mealName: "Collation après-midi", 
+      idealTimeOffset: 540, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: true,
+      suggestedFoodCategories: ["Produits laitiers", "Oléagineux"]
+    },
+    { 
+      mealName: "Dîner", 
+      idealTimeOffset: 720, 
+      flexibilityRange: 45, 
+      complexity: "elaborate", 
+      isPackable: false,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
+    }
   ],
   prise_masse: [
-    { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "simple", isPackable: false },
-    { mealName: "Collation matinale", idealTimeOffset: 180, flexibilityRange: 30, complexity: "simple", isPackable: true },
-    { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
-    { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true },
-    { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "elaborate", isPackable: false },
-    { mealName: "Collation nocturne", idealTimeOffset: 840, flexibilityRange: 30, complexity: "simple", isPackable: false }
+    { 
+      mealName: "Petit-déjeuner", 
+      idealTimeOffset: 30, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: false,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers", "Oléagineux"]
+    },
+    { 
+      mealName: "Collation matinale", 
+      idealTimeOffset: 180, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: true,
+      suggestedFoodCategories: ["Protéines", "Oléagineux", "Produits laitiers"]
+    },
+    { 
+      mealName: "Déjeuner", 
+      idealTimeOffset: 360, 
+      flexibilityRange: 45, 
+      complexity: "moderate", 
+      isPackable: true,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
+    },
+    { 
+      mealName: "Collation après-midi", 
+      idealTimeOffset: 540, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: true,
+      suggestedFoodCategories: ["Produits laitiers", "Oléagineux", "Protéines"]
+    },
+    { 
+      mealName: "Dîner", 
+      idealTimeOffset: 720, 
+      flexibilityRange: 45, 
+      complexity: "elaborate", 
+      isPackable: false,
+      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
+    },
+    { 
+      mealName: "Collation nocturne", 
+      idealTimeOffset: 840, 
+      flexibilityRange: 30, 
+      complexity: "simple", 
+      isPackable: false,
+      suggestedFoodCategories: ["Produits laitiers", "Protéines"]
+    }
   ]
 };
 
@@ -52,6 +158,7 @@ export interface MealSchedule {
   flexibilityAfter: string;
   complexity: "simple" | "moderate" | "elaborate";
   isPackable: boolean;
+  suggestedFoods: FoodItem[];
 }
 
 const adjustMealTimingForWorkDay = (
@@ -99,18 +206,18 @@ export const generateMealSchedule = (
   bedTime: string,
   goal: string,
   numberOfMeals: number,
-  workSchedule?: WorkSchedule
+  workSchedule?: WorkSchedule,
+  recommendedFoods?: FoodItem[]
 ): MealSchedule[] => {
   const mealTimings = [...mealTimingsByGoal[goal]];
   
-  // Si le nombre de repas demandé est inférieur au nombre de repas dans le timing
-  // on retire des collations en priorité
+  // Si le nombre de repas demandé est inférieur, on retire des collations en priorité
   while (mealTimings.length > numberOfMeals) {
     const snackIndex = mealTimings.findIndex(meal => meal.mealName.includes("Collation"));
     if (snackIndex !== -1) {
       mealTimings.splice(snackIndex, 1);
     } else {
-      mealTimings.pop(); // Si plus de collations, on retire le dernier repas
+      mealTimings.pop();
     }
   }
 
@@ -127,6 +234,19 @@ export const generateMealSchedule = (
   return mealTimings.map(timing => {
     let scheduledMinutes = wakeTimeInMinutes + timing.idealTimeOffset;
     let complexity = timing.complexity;
+    let suggestedFoods: FoodItem[] = [];
+
+    // Sélectionner les aliments recommandés pour ce repas
+    if (recommendedFoods) {
+      suggestedFoods = recommendedFoods.filter(food => 
+        timing.suggestedFoodCategories.includes(food.category)
+      ).sort((a, b) => {
+        // Prioriser les aliments adaptés à la complexité du repas
+        if (complexity === "simple" && a.pricePerKg < b.pricePerKg) return -1;
+        if (complexity === "elaborate" && a.macros.proteinPer100g > b.macros.proteinPer100g) return -1;
+        return 0;
+      }).slice(0, 4); // Limiter à 4 suggestions par repas
+    }
 
     // Ajuster le timing et la complexité en fonction du planning de travail
     if (workSchedule && workSchedule.workDays.includes(new Date().toLocaleDateString('fr-FR', { weekday: 'long' }))) {
@@ -157,7 +277,8 @@ export const generateMealSchedule = (
       flexibilityBefore,
       flexibilityAfter,
       complexity,
-      isPackable: timing.isPackable
+      isPackable: timing.isPackable,
+      suggestedFoods
     };
   });
 };
