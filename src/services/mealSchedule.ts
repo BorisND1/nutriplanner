@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { FoodItem } from "./foodRecommendations";
 
@@ -462,27 +461,3 @@ export const getAdaptedRecommendations = async (recommendations: FoodItem[]): Pr
     return true;
   });
 };
-
-export interface FoodItem {
-  name: string;
-  category: string;
-  pricePerKg: number;
-  macros: {
-    caloriesPer100g: number;
-    proteinPer100g: number;
-    carbsPer100g: number;
-    fatsPer100g: number;
-  };
-  allergenes?: string[];
-}
-
-export interface Profile {
-  id: string;
-  email: string;
-  first_name: string | null;
-  created_at: string;
-  notification_enabled: boolean;
-  notification_advance_minutes: number;
-  allergies: string[];
-  monthly_budget: number | null;
-}
