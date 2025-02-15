@@ -27,7 +27,7 @@ serve(async (req) => {
       region
     } = await req.json()
 
-    const prompt = `En tant que nutritionniste expert, génère une liste d'aliments adaptée à ce profil :
+    const prompt = `En tant que nutritionniste expert, génère une liste d'aliments adaptée à ce profil et basée sur les aliments traditionnels de la région ${region} :
     - Âge : ${age} ans
     - Poids : ${weight} kg
     - Taille : ${height} cm
@@ -42,6 +42,9 @@ serve(async (req) => {
       * Glucides : ${macroTargets.carbs}g
       * Lipides : ${macroTargets.fats}g
 
+    Privilégie les aliments traditionnels et facilement disponibles dans la région ${region}.
+    Prends en compte les habitudes alimentaires locales et les préférences culturelles de la région.
+    
     Retourne une liste d'aliments au format JSON avec cette structure exacte pour chaque aliment :
     {
       name: string,
@@ -63,6 +66,7 @@ serve(async (req) => {
     3. Aident à atteindre les objectifs nutritionnels
     4. Sont facilement trouvables dans la région ${region}
     5. Sont culturellement appropriés pour la région
+    6. Proviennent principalement de notre base de données d'aliments régionaux
 
     Retourne exactement 15 aliments typiques de la région.`
 
@@ -75,7 +79,7 @@ serve(async (req) => {
       body: JSON.stringify({
         model: 'gpt-4',
         messages: [
-          { role: 'system', content: "Tu es un expert en nutrition qui génère des listes d'aliments personnalisées au format JSON, spécialisé dans les régimes alimentaires régionaux." },
+          { role: 'system', content: "Tu es un expert en nutrition qui génère des listes d'aliments personnalisées au format JSON, spécialisé dans les régimes alimentaires régionaux et traditionnels." },
           { role: 'user', content: prompt }
         ],
         temperature: 0.7,
