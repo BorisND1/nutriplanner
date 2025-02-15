@@ -20,7 +20,7 @@ messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: "/favicon.ico", // Utilisation de l'icône par défaut de l'application
+    icon: "/favicon.ico",
     badge: "/favicon.ico",
     tag: 'food-planner-notification',
     data: payload.data
