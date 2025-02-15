@@ -17,17 +17,8 @@ export function useInAppNotification() {
           const notificationTitle = payload.notification.title;
           const notificationOptions = {
             body: payload.notification.body,
-            icon: "/favicon.ico",
-            badge: "/favicon.ico",
-            tag: 'food-planner-notification',
-            actions: [
-              {
-                action: 'ajuster',
-                title: 'Ajuster l\'horaire'
-              }
-            ]
+            icon: "/favicon.ico", // Utilisation de l'icône par défaut de l'application
           };
-          
           new Notification(notificationTitle, notificationOptions);
         }
 
@@ -35,7 +26,6 @@ export function useInAppNotification() {
         toast({
           title: payload.notification.title,
           description: payload.notification.body,
-          duration: 10000, // 10 secondes pour laisser le temps de réagir
         });
       }
     });

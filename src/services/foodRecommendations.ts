@@ -1,15 +1,11 @@
-import { supabase } from "@/integrations/supabase/client";
-import type { MealSchedule } from "./mealSchedule";
-import { generateMealSchedule } from "./mealSchedule";
-
-export interface MacroTargets {
+interface MacroTargets {
   calories: number;
   protein: number;
   carbs: number;
   fats: number;
 }
 
-export interface FoodItem {
+interface FoodItem {
   name: string;
   category: string;
   pricePerKg: number;
@@ -238,42 +234,6 @@ const foodDatabase: FoodItem[] = [
       fatsPer100g: 100
     },
     allergenes: []
-  },
-  {
-    name: "Banane",
-    category: "Fruits",
-    pricePerKg: 2,
-    macros: {
-      caloriesPer100g: 89,
-      proteinPer100g: 1.1,
-      carbsPer100g: 22.8,
-      fatsPer100g: 0.3
-    },
-    allergenes: []
-  },
-  {
-    name: "Myrtilles",
-    category: "Fruits",
-    pricePerKg: 15,
-    macros: {
-      caloriesPer100g: 57,
-      proteinPer100g: 0.7,
-      carbsPer100g: 14.5,
-      fatsPer100g: 0.3
-    },
-    allergenes: []
-  },
-  {
-    name: "Miel",
-    category: "Sucres",
-    pricePerKg: 12,
-    macros: {
-      caloriesPer100g: 304,
-      proteinPer100g: 0.3,
-      carbsPer100g: 82.4,
-      fatsPer100g: 0
-    },
-    allergenes: []
   }
 ];
 
@@ -284,8 +244,10 @@ export const calculateDailyMacros = (
   activityLevel: string,
   goal: string
 ): MacroTargets => {
+  // Calcul BMR (Basal Metabolic Rate) avec l'équation de Mifflin-St Jeor
   let bmr = 10 * weight + 6.25 * height - 5 * age;
 
+  // Facteur d'activité
   const activityFactors: { [key: string]: number } = {
     sedentaire: 1.2,
     leger: 1.375,
@@ -294,33 +256,35 @@ export const calculateDailyMacros = (
     tres_actif: 1.9
   };
 
-  let tdee = bmr * activityFactors[activityLevel];
+  let tdee = bmr * activityFactors[activityLevel]; // Total Daily Energy Expenditure
 
+  // Ajustement selon l'objectif
   const goalAdjustments: { [key: string]: number } = {
-    prise_masse: 1.1,
-    perte_poids: 0.8,
-    seche: 0.85
+    prise_masse: 1.1, // +10% calories
+    perte_poids: 0.8, // -20% calories
+    seche: 0.85 // -15% calories
   };
 
   let targetCalories = tdee * goalAdjustments[goal];
 
+  // Répartition des macronutriments selon l'objectif
   let proteinRatio, carbsRatio, fatsRatio;
 
   switch (goal) {
     case "prise_masse":
-      proteinRatio = 0.25;
-      carbsRatio = 0.50;
-      fatsRatio = 0.25;
+      proteinRatio = 0.25; // 25% des calories
+      carbsRatio = 0.50; // 50% des calories
+      fatsRatio = 0.25; // 25% des calories
       break;
     case "perte_poids":
-      proteinRatio = 0.40;
-      carbsRatio = 0.35;
-      fatsRatio = 0.25;
+      proteinRatio = 0.40; // 40% des calories
+      carbsRatio = 0.35; // 35% des calories
+      fatsRatio = 0.25; // 25% des calories
       break;
     case "seche":
-      proteinRatio = 0.45;
-      carbsRatio = 0.30;
-      fatsRatio = 0.25;
+      proteinRatio = 0.45; // 45% des calories
+      carbsRatio = 0.30; // 30% des calories
+      fatsRatio = 0.25; // 25% des calories
       break;
     default:
       proteinRatio = 0.30;
@@ -330,9 +294,9 @@ export const calculateDailyMacros = (
 
   return {
     calories: Math.round(targetCalories),
-    protein: Math.round((targetCalories * proteinRatio) / 4),
-    carbs: Math.round((targetCalories * carbsRatio) / 4),
-    fats: Math.round((targetCalories * fatsRatio) / 9)
+    protein: Math.round((targetCalories * proteinRatio) / 4), // 4 calories par gramme de protéines
+    carbs: Math.round((targetCalories * carbsRatio) / 4), // 4 calories par gramme de glucides
+    fats: Math.round((targetCalories * fatsRatio) / 9) // 9 calories par gramme de lipides
   };
 };
 
@@ -344,20 +308,24 @@ export const generateFoodRecommendations = (
   recommendations: FoodItem[];
   alternativesIfNeeded: FoodItem[];
 } => {
+  // Filtrer les aliments en fonction des allergies
   let availableFoods = foodDatabase.filter(food => 
     !food.allergenes.some(allergene => allergies.includes(allergene))
   );
 
+  // Trier les aliments par rapport qualité/prix (protéines par euro)
   const sortedByValue = availableFoods.sort((a, b) => 
     (b.macros.proteinPer100g / b.pricePerKg) - (a.macros.proteinPer100g / a.pricePerKg)
   );
 
+  // Sélectionner les meilleurs aliments dans chaque catégorie
   const recommendations = {
     proteins: sortedByValue.filter(food => food.macros.proteinPer100g > 20).slice(0, 3),
     carbs: sortedByValue.filter(food => food.macros.carbsPer100g > 15).slice(0, 3),
     fats: sortedByValue.filter(food => food.macros.fatsPer100g > 10).slice(0, 2)
   };
 
+  // Trouver des alternatives économiques si nécessaire
   const alternativesIfNeeded = availableFoods
     .filter(food => food.pricePerKg < 5)
     .sort((a, b) => b.macros.proteinPer100g - a.macros.proteinPer100g)
@@ -375,42 +343,48 @@ export const calculateOptimalMealsPerDay = (
   wakeUpTime: string,
   bedTime: string
 ): number => {
+  // Convertir les heures en minutes depuis minuit pour faciliter les calculs
   const wakeUpMinutes = convertTimeToMinutes(wakeUpTime);
   const bedMinutes = convertTimeToMinutes(bedTime);
   
+  // Calculer la durée d'éveil
   let awakeTime = bedMinutes - wakeUpMinutes;
   if (awakeTime < 0) {
-    awakeTime += 24 * 60;
+    awakeTime += 24 * 60; // Ajouter 24h si l'heure de coucher est le lendemain
   }
 
-  let baseNumberOfMeals = 3;
+  // Base du nombre de repas selon l'objectif
+  let baseNumberOfMeals = 3; // Par défaut
 
   switch (goal) {
     case "prise_masse":
-      baseNumberOfMeals = 5;
+      baseNumberOfMeals = 5; // Plus de repas pour la prise de masse
       break;
     case "perte_poids":
-      baseNumberOfMeals = 4;
+      baseNumberOfMeals = 4; // Repas plus fréquents mais plus petits
       break;
     case "seche":
-      baseNumberOfMeals = 6;
+      baseNumberOfMeals = 6; // Repas très fréquents pour maintenir le métabolisme
       break;
   }
 
+  // Ajustement selon le niveau d'activité
   switch (activityLevel) {
     case "tres_actif":
     case "actif":
-      baseNumberOfMeals += 1;
+      baseNumberOfMeals += 1; // Ajouter un repas pour les personnes très actives
       break;
     case "sedentaire":
-      baseNumberOfMeals = Math.max(3, baseNumberOfMeals - 1);
+      baseNumberOfMeals = Math.max(3, baseNumberOfMeals - 1); // Réduire les repas pour les sédentaires
       break;
   }
 
+  // Si la personne est éveillée moins de 14h, limiter le nombre de repas
   if (awakeTime < 14 * 60) {
     baseNumberOfMeals = Math.min(baseNumberOfMeals, 4);
   }
 
+  // Ne jamais descendre en dessous de 3 repas ou dépasser 6 repas
   return Math.min(Math.max(baseNumberOfMeals, 3), 6);
 };
 
@@ -419,54 +393,8 @@ const convertTimeToMinutes = (time: string): number => {
   return hours * 60 + minutes;
 };
 
-const getMealTypeRecommendations = (
-  mealType: string,
-  goal: string,
-  foods: FoodItem[]
-): FoodItem[] => {
-  let filteredFoods = [...foods];
-
-  // Filtres spécifiques selon le type de repas
-  if (mealType.toLowerCase().includes("petit-déjeuner")) {
-    filteredFoods = foods.filter(food => 
-      ["Céréales", "Produits laitiers", "Fruits", "Oléagineux", "Sucres"].includes(food.category)
-    );
-  } else if (mealType.toLowerCase().includes("collation")) {
-    filteredFoods = foods.filter(food => 
-      ["Fruits", "Oléagineux", "Produits laitiers"].includes(food.category)
-    );
-    
-    // Adaptation pour collation pré/post entraînement
-    if (mealType.toLowerCase().includes("pré-entraînement")) {
-      filteredFoods = foods.filter(food => 
-        ["Fruits", "Céréales", "Oléagineux"].includes(food.category)
-      );
-    } else if (mealType.toLowerCase().includes("post-entraînement")) {
-      filteredFoods = foods.filter(food => 
-        ["Protéines", "Céréales", "Fruits"].includes(food.category)
-      );
-    }
-  } else if (mealType.toLowerCase().includes("déjeuner") || mealType.toLowerCase().includes("dîner")) {
-    filteredFoods = foods.filter(food => 
-      ["Protéines", "Légumineuses", "Céréales", "Féculents", "Matières grasses"].includes(food.category)
-    );
-  }
-
-  // Adaptation selon l'objectif
-  if (goal === 'prise_masse') {
-    filteredFoods.sort((a, b) => 
-      (b.macros.proteinPer100g + b.macros.caloriesPer100g/100) - 
-      (a.macros.proteinPer100g + a.macros.caloriesPer100g/100)
-    );
-  } else if (goal === 'perte_poids') {
-    filteredFoods.sort((a, b) => 
-      (a.macros.caloriesPer100g/a.macros.proteinPer100g) - 
-      (b.macros.caloriesPer100g/b.macros.proteinPer100g)
-    );
-  }
-
-  return filteredFoods.slice(0, 4);
-};
+import { supabase } from "@/integrations/supabase/client";
+import { generateMealSchedule, MealSchedule } from "./mealSchedule";
 
 export const generateCustomFoodList = async (
   age: number,
@@ -506,53 +434,35 @@ export const generateCustomFoodList = async (
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
 
-    // Filtrer les aliments selon les allergies et le budget
-    const filteredFoodList = data.foodList.filter((food: FoodItem) => {
-      const hasAllergy = food.allergenes.some(allergene => allergies.includes(allergene));
-      const isInBudget = food.pricePerKg <= budget / 20; // Estimation simplifiée
-      return !hasAllergy && isInBudget;
-    });
-
+    // Générer le planning des repas
     const mealSchedule = generateMealSchedule(
       wakeUpTime,
       bedTime,
       goal,
       recommendedMealsNumber
-    ).map(meal => ({
-      ...meal,
-      suggestedFoods: getMealTypeRecommendations(meal.mealName, goal, filteredFoodList)
-    }));
+    );
 
     return {
-      foodList: filteredFoodList,
+      foodList: data.foodList,
       recommendedMeals,
       mealSchedule
     };
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
-    
-    // Utiliser la base de données locale en cas d'erreur
-    const filteredFoodList = foodDatabase.filter(food => {
-      const hasAllergy = food.allergenes.some(allergene => allergies.includes(allergene));
-      const isInBudget = food.pricePerKg <= budget / 20;
-      return !hasAllergy && isInBudget;
-    });
-
+    // En cas d'erreur, on retourne la liste statique et un nombre de repas calculé
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
-
+    
+    // Générer le planning des repas même en cas d'erreur
     const mealSchedule = generateMealSchedule(
       wakeUpTime,
       bedTime,
       goal,
       recommendedMealsNumber
-    ).map(meal => ({
-      ...meal,
-      suggestedFoods: getMealTypeRecommendations(meal.mealName, goal, filteredFoodList)
-    }));
+    );
 
     return {
-      foodList: filteredFoodList,
+      foodList: generateFoodRecommendations(macroTargets, allergies, budget).recommendations,
       recommendedMeals,
       mealSchedule
     };

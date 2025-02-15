@@ -1,142 +1,33 @@
 
-import { supabase } from "@/integrations/supabase/client";
-import type { FoodItem } from "./foodRecommendations";
-
 interface MealTiming {
   mealName: string;
-  idealTimeOffset: number;
-  flexibilityRange: number;
+  idealTimeOffset: number; // minutes après le réveil
+  flexibilityRange: number; // minutes de flexibilité avant/après
   complexity: "simple" | "moderate" | "elaborate";
-  isPackable: boolean;
-  suggestedFoodCategories: string[];
+  isPackable: boolean; // indique si le repas peut être préparé à l'avance et emporté
 }
 
 const mealTimingsByGoal: { [key: string]: MealTiming[] } = {
+  prise_masse: [
+    { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "simple", isPackable: false },
+    { mealName: "Collation matinale", idealTimeOffset: 180, flexibilityRange: 30, complexity: "simple", isPackable: true },
+    { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
+    { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true },
+    { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "elaborate", isPackable: false },
+    { mealName: "Collation nocturne", idealTimeOffset: 840, flexibilityRange: 30, complexity: "simple", isPackable: false }
+  ],
   perte_poids: [
-    { 
-      mealName: "Petit-déjeuner", 
-      idealTimeOffset: 30, 
-      flexibilityRange: 30, 
-      complexity: "simple", 
-      isPackable: false,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers", "Oléagineux"]
-    },
-    { 
-      mealName: "Déjeuner", 
-      idealTimeOffset: 360, 
-      flexibilityRange: 45, 
-      complexity: "moderate", 
-      isPackable: true,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
-    },
-    { 
-      mealName: "Collation après-midi", 
-      idealTimeOffset: 540, 
-      flexibilityRange: 30, 
-      complexity: "simple", 
-      isPackable: true,
-      suggestedFoodCategories: ["Produits laitiers", "Oléagineux", "Protéines"]
-    },
-    { 
-      mealName: "Dîner", 
-      idealTimeOffset: 720, 
-      flexibilityRange: 45, 
-      complexity: "moderate", 
-      isPackable: false,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
-    }
+    { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "moderate", isPackable: false },
+    { mealName: "Collation matinale", idealTimeOffset: 180, flexibilityRange: 30, complexity: "simple", isPackable: true },
+    { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
+    { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true }
   ],
   seche: [
-    { 
-      mealName: "Petit-déjeuner", 
-      idealTimeOffset: 30, 
-      flexibilityRange: 30, 
-      complexity: "moderate", 
-      isPackable: false,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers"]
-    },
-    { 
-      mealName: "Collation matinale", 
-      idealTimeOffset: 180, 
-      flexibilityRange: 30, 
-      complexity: "simple", 
-      isPackable: true,
-      suggestedFoodCategories: ["Protéines", "Oléagineux"]
-    },
-    { 
-      mealName: "Déjeuner", 
-      idealTimeOffset: 360, 
-      flexibilityRange: 45, 
-      complexity: "moderate", 
-      isPackable: true,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
-    },
-    { 
-      mealName: "Collation après-midi", 
-      idealTimeOffset: 540, 
-      flexibilityRange: 30, 
-      complexity: "simple", 
-      isPackable: true,
-      suggestedFoodCategories: ["Produits laitiers", "Oléagineux"]
-    },
-    { 
-      mealName: "Dîner", 
-      idealTimeOffset: 720, 
-      flexibilityRange: 45, 
-      complexity: "elaborate", 
-      isPackable: false,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
-    }
-  ],
-  prise_masse: [
-    { 
-      mealName: "Petit-déjeuner copieux", 
-      idealTimeOffset: 30, 
-      flexibilityRange: 30, 
-      complexity: "elaborate", 
-      isPackable: false,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers", "Oléagineux"]
-    },
-    { 
-      mealName: "Collation protéinée matinale", 
-      idealTimeOffset: 180, 
-      flexibilityRange: 30, 
-      complexity: "simple", 
-      isPackable: true,
-      suggestedFoodCategories: ["Protéines", "Oléagineux", "Produits laitiers"]
-    },
-    { 
-      mealName: "Déjeuner riche", 
-      idealTimeOffset: 360, 
-      flexibilityRange: 45, 
-      complexity: "elaborate", 
-      isPackable: true,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
-    },
-    { 
-      mealName: "Collation pré-entraînement", 
-      idealTimeOffset: 480, 
-      flexibilityRange: 30, 
-      complexity: "simple", 
-      isPackable: true,
-      suggestedFoodCategories: ["Produits laitiers", "Oléagineux", "Protéines"]
-    },
-    { 
-      mealName: "Collation post-entraînement", 
-      idealTimeOffset: 600, 
-      flexibilityRange: 30, 
-      complexity: "simple", 
-      isPackable: true,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Produits laitiers"]
-    },
-    { 
-      mealName: "Dîner consistant", 
-      idealTimeOffset: 720, 
-      flexibilityRange: 45, 
-      complexity: "elaborate", 
-      isPackable: false,
-      suggestedFoodCategories: ["Protéines", "Céréales", "Légumineuses", "Matières grasses"]
-    }
+    { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "moderate", isPackable: false },
+    { mealName: "Collation matinale", idealTimeOffset: 180, flexibilityRange: 30, complexity: "simple", isPackable: true },
+    { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
+    { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true },
+    { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "elaborate", isPackable: false }
   ]
 };
 
@@ -159,7 +50,6 @@ export interface MealSchedule {
   flexibilityAfter: string;
   complexity: "simple" | "moderate" | "elaborate";
   isPackable: boolean;
-  suggestedFoods: FoodItem[];
 }
 
 const adjustMealTimingForWorkDay = (
@@ -207,42 +97,18 @@ export const generateMealSchedule = (
   bedTime: string,
   goal: string,
   numberOfMeals: number,
-  workSchedule?: WorkSchedule,
-  recommendedFoods?: FoodItem[]
+  workSchedule?: WorkSchedule
 ): MealSchedule[] => {
   const mealTimings = [...mealTimingsByGoal[goal]];
   
-  // Optimisation du nombre de repas en fonction de l'objectif
-  const optimalNumberOfMeals = {
-    perte_poids: { min: 3, max: 4 },
-    seche: { min: 4, max: 5 },
-    prise_masse: { min: 4, max: 6 }
-  };
-
-  const { min, max } = optimalNumberOfMeals[goal as keyof typeof optimalNumberOfMeals];
-  let adjustedNumberOfMeals = Math.max(min, Math.min(max, numberOfMeals));
-
-  // Si le nombre de repas demandé est inférieur au minimum recommandé, on utilise le minimum
-  while (mealTimings.length > adjustedNumberOfMeals) {
-    // Pour la prise de masse, on garde les repas principaux et post-entraînement
-    if (goal === 'prise_masse') {
-      const snackIndex = mealTimings.findIndex(meal => 
-        meal.mealName.includes("Collation") && 
-        !meal.mealName.includes("post-entraînement")
-      );
-      if (snackIndex !== -1) {
-        mealTimings.splice(snackIndex, 1);
-      } else {
-        mealTimings.pop();
-      }
+  // Si le nombre de repas demandé est inférieur au nombre de repas dans le timing
+  // on retire des collations en priorité
+  while (mealTimings.length > numberOfMeals) {
+    const snackIndex = mealTimings.findIndex(meal => meal.mealName.includes("Collation"));
+    if (snackIndex !== -1) {
+      mealTimings.splice(snackIndex, 1);
     } else {
-      // Pour les autres objectifs, on retire d'abord les collations
-      const snackIndex = mealTimings.findIndex(meal => meal.mealName.includes("Collation"));
-      if (snackIndex !== -1) {
-        mealTimings.splice(snackIndex, 1);
-      } else {
-        mealTimings.pop();
-      }
+      mealTimings.pop(); // Si plus de collations, on retire le dernier repas
     }
   }
 
@@ -256,34 +122,9 @@ export const generateMealSchedule = (
     awakeTime += 24 * 60; // Ajouter 24h si l'heure de coucher est le lendemain
   }
 
-  // Calcul des intervalles optimaux entre les repas
-  const awakeMinutes = awakeTime;
-  const idealInterval = Math.floor(awakeMinutes / (mealTimings.length + 1));
-
-  return mealTimings.map((timing, index) => {
-    // Ajuster l'idealTimeOffset en fonction de l'intervalle optimal
-    timing.idealTimeOffset = (index + 1) * idealInterval;
-
+  return mealTimings.map(timing => {
     let scheduledMinutes = wakeTimeInMinutes + timing.idealTimeOffset;
     let complexity = timing.complexity;
-    let suggestedFoods: FoodItem[] = [];
-
-    // Sélectionner les aliments recommandés pour ce repas
-    if (recommendedFoods) {
-      suggestedFoods = recommendedFoods.filter(food => 
-        timing.suggestedFoodCategories.includes(food.category)
-      ).sort((a, b) => {
-        // Prioriser les aliments riches en protéines pour la prise de masse
-        if (goal === 'prise_masse') {
-          return b.macros.proteinPer100g - a.macros.proteinPer100g;
-        }
-        // Prioriser les aliments moins caloriques pour la perte de poids
-        if (goal === 'perte_poids') {
-          return a.macros.caloriesPer100g - b.macros.caloriesPer100g;
-        }
-        return 0;
-      }).slice(0, 4);
-    }
 
     // Ajuster le timing et la complexité en fonction du planning de travail
     if (workSchedule && workSchedule.workDays.includes(new Date().toLocaleDateString('fr-FR', { weekday: 'long' }))) {
@@ -301,7 +142,7 @@ export const generateMealSchedule = (
 
     const scheduledTime = `${String(scheduledHours).padStart(2, '0')}:${String(remainingMinutes).padStart(2, '0')}`;
 
-    // Calcul des plages de flexibilité optimisées
+    // Calcul des plages de flexibilité
     let flexBeforeMinutes = (scheduledMinutes - timing.flexibilityRange + 24 * 60) % (24 * 60);
     let flexAfterMinutes = (scheduledMinutes + timing.flexibilityRange) % (24 * 60);
 
@@ -314,187 +155,7 @@ export const generateMealSchedule = (
       flexibilityBefore,
       flexibilityAfter,
       complexity,
-      isPackable: timing.isPackable,
-      suggestedFoods
+      isPackable: timing.isPackable
     };
-  });
-};
-
-export interface CustomMealSchedule {
-  id: string;
-  originalMealName: string;
-  customMealName?: string;
-  scheduledTime: string;
-  customTime?: string;
-  mealType: "petit-dejeuner" | "collation" | "dejeuner" | "diner";
-  isAlternative: boolean;
-  date: string;
-}
-
-export const saveMealSchedule = async (schedule: MealSchedule[], date: string) => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Utilisateur non connecté");
-
-  // Sauvegarder le planning des repas
-  const mealSchedules = schedule.map(meal => ({
-    user_id: user.id,
-    original_meal_name: meal.mealName,
-    scheduled_time: meal.scheduledTime,
-    meal_type: getMealType(meal.mealName),
-    date: date,
-  }));
-
-  const { error: scheduleError } = await supabase
-    .from('meal_schedules')
-    .upsert(mealSchedules, { onConflict: 'user_id,date,original_meal_name' });
-
-  if (scheduleError) throw scheduleError;
-
-  // Créer les notifications pour les repas
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('notification_enabled, notification_advance_minutes')
-    .eq('id', user.id)
-    .single();
-
-  if (profile?.notification_enabled) {
-    const notifications = schedule.map(meal => ({
-      user_id: user.id,
-      meal_name: meal.mealName,
-      scheduled_time: meal.scheduledTime,
-      notification_sent: false
-    }));
-
-    const { error: notificationError } = await supabase
-      .from('meal_notifications')
-      .upsert(notifications, { 
-        onConflict: 'user_id,meal_name,scheduled_time',
-        ignoreDuplicates: true 
-      });
-
-    if (notificationError) throw notificationError;
-  }
-};
-
-export const updateMealSchedule = async (mealId: string, updates: Partial<CustomMealSchedule>) => {
-  const { error } = await supabase
-    .from('meal_schedules')
-    .update({
-      custom_meal_name: updates.customMealName,
-      custom_time: updates.customTime,
-      is_alternative: updates.isAlternative,
-    })
-    .eq('id', mealId);
-
-  if (error) throw error;
-};
-
-export const getMealScheduleForDate = async (date: string): Promise<CustomMealSchedule[]> => {
-  const { data, error } = await supabase
-    .from('meal_schedules')
-    .select('*')
-    .eq('date', date)
-    .order('scheduled_time');
-
-  if (error) throw error;
-  
-  return data.map(meal => {
-    // Valider le type de repas
-    const mealType = validateMealType(meal.meal_type);
-    
-    return {
-      id: meal.id,
-      originalMealName: meal.original_meal_name,
-      customMealName: meal.custom_meal_name,
-      scheduledTime: meal.scheduled_time,
-      customTime: meal.custom_time,
-      mealType,
-      isAlternative: meal.is_alternative,
-      date: meal.date,
-    };
-  });
-};
-
-const getMealType = (mealName: string): "petit-dejeuner" | "collation" | "dejeuner" | "diner" => {
-  const name = mealName.toLowerCase();
-  if (name.includes("petit-déjeuner")) return "petit-dejeuner";
-  if (name.includes("collation")) return "collation";
-  if (name.includes("déjeuner")) return "dejeuner";
-  return "diner";
-};
-
-const validateMealType = (type: string): "petit-dejeuner" | "collation" | "dejeuner" | "diner" => {
-  const validTypes = ["petit-dejeuner", "collation", "dejeuner", "diner"] as const;
-  if (validTypes.includes(type as any)) {
-    return type as "petit-dejeuner" | "collation" | "dejeuner" | "diner";
-  }
-  // Par défaut, retourner "collation" si le type n'est pas valide
-  console.warn(`Type de repas invalide: ${type}, utilisation de "collation" par défaut`);
-  return "collation";
-};
-
-export const generateQuickAlternatives = (meal: MealSchedule): MealSchedule[] => {
-  const quickAlternatives: MealSchedule[] = [];
-  
-  if (meal.mealName.toLowerCase().includes("petit-déjeuner")) {
-    quickAlternatives.push({
-      ...meal,
-      mealName: "Petit-déjeuner express",
-      complexity: "simple",
-      isPackable: true,
-    });
-  }
-  
-  if (meal.mealName.toLowerCase().includes("déjeuner")) {
-    quickAlternatives.push({
-      ...meal,
-      mealName: "Déjeuner sur le pouce",
-      complexity: "simple",
-      isPackable: true,
-    });
-  }
-  
-  if (meal.mealName.toLowerCase().includes("dîner")) {
-    quickAlternatives.push({
-      ...meal,
-      mealName: "Dîner express",
-      complexity: "simple",
-      isPackable: true,
-    });
-  }
-
-  return quickAlternatives;
-};
-
-export const getAdaptedRecommendations = async (recommendations: FoodItem[]): Promise<FoodItem[]> => {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) throw new Error("Utilisateur non connecté");
-
-  // Récupérer le profil utilisateur avec ses contraintes
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile) return recommendations;
-
-  // Filtrer les recommandations en fonction des allergies et du budget
-  return recommendations.filter(food => {
-    // Vérifier les allergies
-    const hasAllergy = food.allergenes?.some(allergene => 
-      profile.allergies?.includes(allergene)
-    );
-    if (hasAllergy) return false;
-
-    // Vérifier le budget (si défini)
-    if (profile.monthly_budget) {
-      // Estimation simple : le budget quotidien divisé par le nombre de repas
-      const dailyBudget = profile.monthly_budget / 30;
-      const maxPricePerMeal = dailyBudget / 3; // Hypothèse de 3 repas par jour
-      if (food.pricePerKg > maxPricePerMeal * 2) return false; // Marge de sécurité
-    }
-
-    return true;
   });
 };
