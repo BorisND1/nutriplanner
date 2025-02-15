@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import type { MealSchedule } from "./mealSchedule";
 import { generateMealSchedule } from "./mealSchedule";
@@ -239,6 +238,42 @@ const foodDatabase: FoodItem[] = [
       fatsPer100g: 100
     },
     allergenes: []
+  },
+  {
+    name: "Banane",
+    category: "Fruits",
+    pricePerKg: 2,
+    macros: {
+      caloriesPer100g: 89,
+      proteinPer100g: 1.1,
+      carbsPer100g: 22.8,
+      fatsPer100g: 0.3
+    },
+    allergenes: []
+  },
+  {
+    name: "Myrtilles",
+    category: "Fruits",
+    pricePerKg: 15,
+    macros: {
+      caloriesPer100g: 57,
+      proteinPer100g: 0.7,
+      carbsPer100g: 14.5,
+      fatsPer100g: 0.3
+    },
+    allergenes: []
+  },
+  {
+    name: "Miel",
+    category: "Sucres",
+    pricePerKg: 12,
+    macros: {
+      caloriesPer100g: 304,
+      proteinPer100g: 0.3,
+      carbsPer100g: 82.4,
+      fatsPer100g: 0
+    },
+    allergenes: []
   }
 ];
 
@@ -384,6 +419,55 @@ const convertTimeToMinutes = (time: string): number => {
   return hours * 60 + minutes;
 };
 
+const getMealTypeRecommendations = (
+  mealType: string,
+  goal: string,
+  foods: FoodItem[]
+): FoodItem[] => {
+  let filteredFoods = [...foods];
+
+  // Filtres spécifiques selon le type de repas
+  if (mealType.toLowerCase().includes("petit-déjeuner")) {
+    filteredFoods = foods.filter(food => 
+      ["Céréales", "Produits laitiers", "Fruits", "Oléagineux", "Sucres"].includes(food.category)
+    );
+  } else if (mealType.toLowerCase().includes("collation")) {
+    filteredFoods = foods.filter(food => 
+      ["Fruits", "Oléagineux", "Produits laitiers"].includes(food.category)
+    );
+    
+    // Adaptation pour collation pré/post entraînement
+    if (mealType.toLowerCase().includes("pré-entraînement")) {
+      filteredFoods = foods.filter(food => 
+        ["Fruits", "Céréales", "Oléagineux"].includes(food.category)
+      );
+    } else if (mealType.toLowerCase().includes("post-entraînement")) {
+      filteredFoods = foods.filter(food => 
+        ["Protéines", "Céréales", "Fruits"].includes(food.category)
+      );
+    }
+  } else if (mealType.toLowerCase().includes("déjeuner") || mealType.toLowerCase().includes("dîner")) {
+    filteredFoods = foods.filter(food => 
+      ["Protéines", "Légumineuses", "Céréales", "Féculents", "Matières grasses"].includes(food.category)
+    );
+  }
+
+  // Adaptation selon l'objectif
+  if (goal === 'prise_masse') {
+    filteredFoods.sort((a, b) => 
+      (b.macros.proteinPer100g + b.macros.caloriesPer100g/100) - 
+      (a.macros.proteinPer100g + a.macros.caloriesPer100g/100)
+    );
+  } else if (goal === 'perte_poids') {
+    filteredFoods.sort((a, b) => 
+      (a.macros.caloriesPer100g/a.macros.proteinPer100g) - 
+      (b.macros.caloriesPer100g/b.macros.proteinPer100g)
+    );
+  }
+
+  return filteredFoods.slice(0, 4);
+};
+
 export const generateCustomFoodList = async (
   age: number,
   weight: number,
@@ -422,20 +506,38 @@ export const generateCustomFoodList = async (
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
 
+    // Filtrer les aliments selon les allergies et le budget
+    const filteredFoodList = data.foodList.filter((food: FoodItem) => {
+      const hasAllergy = food.allergenes.some(allergene => allergies.includes(allergene));
+      const isInBudget = food.pricePerKg <= budget / 20; // Estimation simplifiée
+      return !hasAllergy && isInBudget;
+    });
+
     const mealSchedule = generateMealSchedule(
       wakeUpTime,
       bedTime,
       goal,
       recommendedMealsNumber
-    );
+    ).map(meal => ({
+      ...meal,
+      suggestedFoods: getMealTypeRecommendations(meal.mealName, goal, filteredFoodList)
+    }));
 
     return {
-      foodList: data.foodList,
+      foodList: filteredFoodList,
       recommendedMeals,
       mealSchedule
     };
   } catch (error) {
     console.error("Erreur lors de la génération de la liste d'aliments:", error);
+    
+    // Utiliser la base de données locale en cas d'erreur
+    const filteredFoodList = foodDatabase.filter(food => {
+      const hasAllergy = food.allergenes.some(allergene => allergies.includes(allergene));
+      const isInBudget = food.pricePerKg <= budget / 20;
+      return !hasAllergy && isInBudget;
+    });
+
     const recommendedMealsNumber = calculateOptimalMealsPerDay(goal, activityLevel, wakeUpTime, bedTime);
     const recommendedMeals = String(recommendedMealsNumber) as "3" | "4" | "5" | "6";
 
@@ -444,10 +546,13 @@ export const generateCustomFoodList = async (
       bedTime,
       goal,
       recommendedMealsNumber
-    );
+    ).map(meal => ({
+      ...meal,
+      suggestedFoods: getMealTypeRecommendations(meal.mealName, goal, filteredFoodList)
+    }));
 
     return {
-      foodList: generateFoodRecommendations(macroTargets, allergies, budget).recommendations,
+      foodList: filteredFoodList,
       recommendedMeals,
       mealSchedule
     };
