@@ -17,13 +17,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useGeolocation } from "@/hooks/useGeolocation";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { Control } from "react-hook-form";
 
 interface RegionSelectorProps {
   control: Control<any>;
   name: string;
+  onRegionChange?: (region: string) => void;
 }
 
 export const REGIONS = [
@@ -36,87 +37,80 @@ export const REGIONS = [
   { value: "Moyen-Orient", label: "Moyen-Orient" }
 ] as const;
 
-export const RegionSelector: React.FC<RegionSelectorProps> = ({ control, name }) => {
+export const RegionSelector: React.FC<RegionSelectorProps> = ({ control, name, onRegionChange }) => {
   const { region, loading, error } = useGeolocation();
   const { toast } = useToast();
 
   React.useEffect(() => {
     if (region) {
-      // On utilise la méthode field.onChange directement dans le render
-      toast({
-        title: "Région détectée",
-        description: `Votre région a été détectée : ${region}`,
-      });
+      onRegionChange?.(region);
     }
-  }, [region]);
+  }, [region, onRegionChange]);
 
   return (
     <FormField
       control={control}
       name={name}
-      render={({ field }) => {
-        // Mettre à jour la valeur si la région est détectée
-        React.useEffect(() => {
-          if (region) {
-            field.onChange(region);
-          }
-        }, [region, field]);
-
-        return (
-          <FormItem>
-            <FormLabel>Région</FormLabel>
-            <div className="space-y-2">
-              <Select onValueChange={field.onChange} value={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Sélectionnez votre région" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  {REGIONS.map((region) => (
-                    <SelectItem key={region.value} value={region.value}>
-                      {region.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <div className="flex items-center space-x-2">
-                {loading ? (
-                  <Button variant="outline" disabled>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Détection en cours...
-                  </Button>
-                ) : (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={() => {
-                      if (navigator.geolocation) {
-                        navigator.geolocation.getCurrentPosition(
-                          () => {},
-                          () => {
-                            toast({
-                              title: "Erreur",
-                              description: "Impossible d'accéder à votre position",
-                              variant: "destructive",
-                            });
-                          }
-                        );
-                      }
-                    }}
-                  >
-                    Détecter ma région
-                  </Button>
-                )}
-              </div>
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>Région</FormLabel>
+          <div className="space-y-2">
+            <Select 
+              onValueChange={(value) => {
+                field.onChange(value);
+                onRegionChange?.(value);
+              }} 
+              value={field.value}
+            >
+              <FormControl>
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionnez votre région" />
+                </SelectTrigger>
+              </FormControl>
+              <SelectContent>
+                {REGIONS.map((region) => (
+                  <SelectItem key={region.value} value={region.value}>
+                    {region.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <div className="flex items-center space-x-2">
+              {loading ? (
+                <Button variant="outline" disabled>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Détection en cours...
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    if (navigator.geolocation) {
+                      navigator.geolocation.getCurrentPosition(
+                        () => {},
+                        () => {
+                          toast({
+                            title: "Erreur",
+                            description: "Impossible d'accéder à votre position",
+                            variant: "destructive",
+                          });
+                        }
+                      );
+                    }
+                  }}
+                >
+                  Détecter ma région
+                </Button>
+              )}
             </div>
-            <FormDescription>
-              Sélectionnez votre région pour obtenir des recommandations adaptées à vos habitudes alimentaires locales
-            </FormDescription>
-            <FormMessage />
-          </FormItem>
-        );
-      }}
+          </div>
+          <FormDescription>
+            Sélectionnez votre région pour obtenir des recommandations adaptées à vos habitudes alimentaires locales
+          </FormDescription>
+          <FormMessage />
+        </FormItem>
+      )}
     />
   );
 };
