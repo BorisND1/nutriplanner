@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 interface MealTiming {
@@ -9,19 +10,11 @@ interface MealTiming {
 }
 
 const mealTimingsByGoal: { [key: string]: MealTiming[] } = {
-  prise_masse: [
+  perte_poids: [
     { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "simple", isPackable: false },
-    { mealName: "Collation matinale", idealTimeOffset: 180, flexibilityRange: 30, complexity: "simple", isPackable: true },
     { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
     { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true },
-    { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "elaborate", isPackable: false },
-    { mealName: "Collation nocturne", idealTimeOffset: 840, flexibilityRange: 30, complexity: "simple", isPackable: false }
-  ],
-  perte_poids: [
-    { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "moderate", isPackable: false },
-    { mealName: "Collation matinale", idealTimeOffset: 180, flexibilityRange: 30, complexity: "simple", isPackable: true },
-    { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
-    { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true }
+    { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "moderate", isPackable: false }
   ],
   seche: [
     { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "moderate", isPackable: false },
@@ -29,6 +22,14 @@ const mealTimingsByGoal: { [key: string]: MealTiming[] } = {
     { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
     { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true },
     { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "elaborate", isPackable: false }
+  ],
+  prise_masse: [
+    { mealName: "Petit-déjeuner", idealTimeOffset: 30, flexibilityRange: 30, complexity: "simple", isPackable: false },
+    { mealName: "Collation matinale", idealTimeOffset: 180, flexibilityRange: 30, complexity: "simple", isPackable: true },
+    { mealName: "Déjeuner", idealTimeOffset: 360, flexibilityRange: 45, complexity: "moderate", isPackable: true },
+    { mealName: "Collation après-midi", idealTimeOffset: 540, flexibilityRange: 30, complexity: "simple", isPackable: true },
+    { mealName: "Dîner", idealTimeOffset: 720, flexibilityRange: 45, complexity: "elaborate", isPackable: false },
+    { mealName: "Collation nocturne", idealTimeOffset: 840, flexibilityRange: 30, complexity: "simple", isPackable: false }
   ]
 };
 
