@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 interface MealTiming {
@@ -213,16 +212,22 @@ export const getMealScheduleForDate = async (date: string): Promise<CustomMealSc
     .order('scheduled_time');
 
   if (error) throw error;
-  return data.map(meal => ({
-    id: meal.id,
-    originalMealName: meal.original_meal_name,
-    customMealName: meal.custom_meal_name,
-    scheduledTime: meal.scheduled_time,
-    customTime: meal.custom_time,
-    mealType: meal.meal_type,
-    isAlternative: meal.is_alternative,
-    date: meal.date,
-  }));
+  
+  return data.map(meal => {
+    // Valider le type de repas
+    const mealType = validateMealType(meal.meal_type);
+    
+    return {
+      id: meal.id,
+      originalMealName: meal.original_meal_name,
+      customMealName: meal.custom_meal_name,
+      scheduledTime: meal.scheduled_time,
+      customTime: meal.custom_time,
+      mealType,
+      isAlternative: meal.is_alternative,
+      date: meal.date,
+    };
+  });
 };
 
 const getMealType = (mealName: string): "petit-dejeuner" | "collation" | "dejeuner" | "diner" => {
@@ -231,6 +236,16 @@ const getMealType = (mealName: string): "petit-dejeuner" | "collation" | "dejeun
   if (name.includes("collation")) return "collation";
   if (name.includes("déjeuner")) return "dejeuner";
   return "diner";
+};
+
+const validateMealType = (type: string): "petit-dejeuner" | "collation" | "dejeuner" | "diner" => {
+  const validTypes = ["petit-dejeuner", "collation", "dejeuner", "diner"] as const;
+  if (validTypes.includes(type as any)) {
+    return type as "petit-dejeuner" | "collation" | "dejeuner" | "diner";
+  }
+  // Par défaut, retourner "collation" si le type n'est pas valide
+  console.warn(`Type de repas invalide: ${type}, utilisation de "collation" par défaut`);
+  return "collation";
 };
 
 export const generateQuickAlternatives = (meal: MealSchedule): MealSchedule[] => {
