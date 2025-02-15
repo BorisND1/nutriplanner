@@ -47,41 +47,28 @@ serve(async (req) => {
       * Lipides : ${macroTargets.fats}g
 
     Liste des aliments disponibles :
-    ${JSON.stringify(availableFoods, null, 2)}
+    ${JSON.stringify(availableFoods)}
 
     Alternatives économiques disponibles :
-    ${JSON.stringify(economicAlternatives, null, 2)}
+    ${JSON.stringify(economicAlternatives)}
 
-    Privilégie les aliments traditionnels et facilement disponibles dans la région ${region}.
-    Les prix sont indiqués en ${currencyInfo.currencySymbol} (${currencyInfo.currencyCode}).
-    Si le budget est limité, utilise les alternatives économiques proposées.
-    Prends en compte les habitudes alimentaires locales et les préférences culturelles de la région.
-    
-    Retourne une liste d'aliments au format JSON avec cette structure exacte pour chaque aliment :
+    Retourne exactement 15 aliments au format JSON stringifié, avec la structure suivante pour chaque aliment :
     {
-      name: string,
-      category: string (une des catégories suivantes : "Protéines", "Céréales", "Légumineuses", "Matières grasses", "Produits laitiers", "Oléagineux", "Fruits", "Légumes"),
-      pricePerKg: number (prix au kilo en ${currencyInfo.currencySymbol}),
-      localPricePerKg: number (prix local au kilo en ${currencyInfo.currencySymbol}),
-      macros: {
-        caloriesPer100g: number,
-        proteinPer100g: number,
-        carbsPer100g: number,
-        fatsPer100g: number
+      "name": string,
+      "category": string (une des catégories : "Protéines", "Céréales", "Légumineuses", "Matières grasses"),
+      "pricePerKg": number,
+      "localPricePerKg": number,
+      "macros": {
+        "caloriesPer100g": number,
+        "proteinPer100g": number,
+        "carbsPer100g": number,
+        "fatsPer100g": number
       },
-      allergenes: string[],
-      region: string
+      "allergenes": string[],
+      "region": string
     }
 
-    Inclure uniquement des aliments qui :
-    1. Respectent les contraintes d'allergies mentionnées
-    2. Sont adaptés au budget indiqué (utilise les alternatives économiques si nécessaire)
-    3. Aident à atteindre les objectifs nutritionnels
-    4. Sont facilement trouvables dans la région ${region}
-    5. Sont culturellement appropriés pour la région
-    6. Proviennent de notre base de données d'aliments régionaux
-
-    Retourne exactement 15 aliments typiques de la région.`
+    Ne retourne que le tableau JSON, pas de commentaires ni d'explications. Assure-toi que c'est un JSON valide.`
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -90,7 +77,7 @@ serve(async (req) => {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'gpt-4',
+        model: 'gpt-4o-mini',
         messages: [
           { role: 'system', content: "Tu es un expert en nutrition qui génère des listes d'aliments personnalisées au format JSON, spécialisé dans les régimes alimentaires régionaux et traditionnels." },
           { role: 'user', content: prompt }
@@ -105,11 +92,20 @@ serve(async (req) => {
     try {
       foodList = JSON.parse(data.choices[0].message.content)
     } catch (e) {
+      console.error("Erreur lors du parsing de la réponse:", e)
+      console.log("Réponse brute:", data.choices[0].message.content)
+      
+      // Essayer de nettoyer la réponse en enlevant tout ce qui n'est pas entre crochets
       const jsonMatch = data.choices[0].message.content.match(/\[[\s\S]*\]/)
       if (jsonMatch) {
-        foodList = JSON.parse(jsonMatch[0])
+        try {
+          foodList = JSON.parse(jsonMatch[0])
+        } catch (e2) {
+          console.error("Erreur lors du second parsing:", e2)
+          throw new Error("Format de réponse invalide")
+        }
       } else {
-        throw new Error("Impossible de parser la réponse en JSON")
+        throw new Error("Impossible de trouver un JSON valide dans la réponse")
       }
     }
 
