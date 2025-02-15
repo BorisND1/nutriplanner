@@ -176,6 +176,7 @@ export const saveMealSchedule = async (schedule: MealSchedule[], date: string) =
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) throw new Error("Utilisateur non connecté");
 
+  // Sauvegarder le planning des repas
   const mealSchedules = schedule.map(meal => ({
     user_id: user.id,
     original_meal_name: meal.mealName,
@@ -184,11 +185,36 @@ export const saveMealSchedule = async (schedule: MealSchedule[], date: string) =
     date: date,
   }));
 
-  const { error } = await supabase
+  const { error: scheduleError } = await supabase
     .from('meal_schedules')
     .upsert(mealSchedules, { onConflict: 'user_id,date,original_meal_name' });
 
-  if (error) throw error;
+  if (scheduleError) throw scheduleError;
+
+  // Créer les notifications pour les repas
+  const { data: profile } = await supabase
+    .from('profiles')
+    .select('notification_enabled, notification_advance_minutes')
+    .eq('id', user.id)
+    .single();
+
+  if (profile?.notification_enabled) {
+    const notifications = schedule.map(meal => ({
+      user_id: user.id,
+      meal_name: meal.mealName,
+      scheduled_time: meal.scheduledTime,
+      notification_sent: false
+    }));
+
+    const { error: notificationError } = await supabase
+      .from('meal_notifications')
+      .upsert(notifications, { 
+        onConflict: 'user_id,meal_name,scheduled_time',
+        ignoreDuplicates: true 
+      });
+
+    if (notificationError) throw notificationError;
+  }
 };
 
 export const updateMealSchedule = async (mealId: string, updates: Partial<CustomMealSchedule>) => {
@@ -280,3 +306,49 @@ export const generateQuickAlternatives = (meal: MealSchedule): MealSchedule[] =>
 
   return quickAlternatives;
 };
+
+export const getAdaptedRecommendations = async (recommendations: FoodItem[]): Promise<FoodItem[]> => {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("Utilisateur non connecté");
+
+  // Récupérer le profil utilisateur avec ses contraintes
+  const { data: profiles } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single();
+
+  if (!profiles) return recommendations;
+
+  // Filtrer les recommandations en fonction des allergies et du budget
+  return recommendations.filter(food => {
+    // Vérifier les allergies
+    const hasAllergy = food.allergenes?.some(allergene => 
+      profiles.allergies?.includes(allergene)
+    );
+    if (hasAllergy) return false;
+
+    // Vérifier le budget (si défini)
+    if (profiles.monthly_budget) {
+      // Estimation simple : le budget quotidien divisé par le nombre de repas
+      const dailyBudget = profiles.monthly_budget / 30;
+      const maxPricePerMeal = dailyBudget / 3; // Hypothèse de 3 repas par jour
+      if (food.pricePerKg > maxPricePerMeal * 2) return false; // Marge de sécurité
+    }
+
+    return true;
+  });
+};
+
+export interface FoodItem {
+  name: string;
+  category: string;
+  pricePerKg: number;
+  macros: {
+    caloriesPer100g: number;
+    proteinPer100g: number;
+    carbsPer100g: number;
+    fatsPer100g: number;
+  };
+  allergenes?: string[];
+}
