@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import type { MealSchedule, generateMealSchedule } from "./mealSchedule";
+import type { MealSchedule } from "./mealSchedule";
+import { generateMealSchedule } from "./mealSchedule";
 
 export interface MacroTargets {
   calories: number;
