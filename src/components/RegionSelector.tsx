@@ -19,9 +19,10 @@ import {
 import { useGeolocation } from "@/hooks/useGeolocation";
 import { useToast } from "@/components/ui/use-toast";
 import { Loader2 } from "lucide-react";
+import { Control } from "react-hook-form";
 
 interface RegionSelectorProps {
-  control: any;
+  control: Control<any>;
   name: string;
 }
 
@@ -38,17 +39,21 @@ export const REGIONS = [
 export const RegionSelector: React.FC<RegionSelectorProps> = ({ control, name }) => {
   const { region, loading, error } = useGeolocation();
   const { toast } = useToast();
-  const form = control._formState;
 
   React.useEffect(() => {
-    if (region && !form.defaultValues?.region) {
-      control._fields[name]?._f.onChange(region);
+    if (region) {
+      // Utiliser l'API setValue de react-hook-form
+      control.setValue(name, region, {
+        shouldValidate: true,
+        shouldDirty: true
+      });
+      
       toast({
         title: "Région détectée",
         description: `Votre région a été détectée : ${region}`,
       });
     }
-  }, [region, control, name, form.defaultValues?.region]);
+  }, [region, control, name]);
 
   return (
     <FormField
