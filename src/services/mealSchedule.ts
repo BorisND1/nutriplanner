@@ -1,3 +1,6 @@
+
+import { supabase } from "@/integrations/supabase/client";
+
 interface MealTiming {
   mealName: string;
   idealTimeOffset: number; // minutes après le réveil
@@ -233,7 +236,6 @@ const getMealType = (mealName: string): "petit-dejeuner" | "collation" | "dejeun
 export const generateQuickAlternatives = (meal: MealSchedule): MealSchedule[] => {
   const quickAlternatives: MealSchedule[] = [];
   
-  // Alternative rapide pour le petit-déjeuner
   if (meal.mealName.toLowerCase().includes("petit-déjeuner")) {
     quickAlternatives.push({
       ...meal,
@@ -243,7 +245,6 @@ export const generateQuickAlternatives = (meal: MealSchedule): MealSchedule[] =>
     });
   }
   
-  // Alternative rapide pour le déjeuner
   if (meal.mealName.toLowerCase().includes("déjeuner")) {
     quickAlternatives.push({
       ...meal,
@@ -253,7 +254,6 @@ export const generateQuickAlternatives = (meal: MealSchedule): MealSchedule[] =>
     });
   }
   
-  // Alternative rapide pour le dîner
   if (meal.mealName.toLowerCase().includes("dîner")) {
     quickAlternatives.push({
       ...meal,
