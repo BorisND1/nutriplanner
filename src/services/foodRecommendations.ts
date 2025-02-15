@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { generateMealSchedule, MealSchedule } from "./mealSchedule";
 
@@ -441,8 +440,29 @@ const convertTimeToMinutes = (time: string): number => {
   return hours * 60 + minutes;
 };
 
-import { supabase } from "@/integrations/supabase/client";
-import { generateMealSchedule, MealSchedule } from "./mealSchedule";
+const getCurrencyInfo = async (region: string): Promise<CurrencyInfo> => {
+  const { data, error } = await supabase
+    .from('currency_by_region')
+    .select('currency_code, currency_symbol, exchange_rate_to_euro')
+    .eq('region', region)
+    .single();
+
+  if (error) {
+    console.error("Erreur lors de la récupération des informations de devise:", error);
+    // Valeurs par défaut pour l'euro
+    return {
+      currencyCode: 'EUR',
+      currencySymbol: '€',
+      exchangeRateToEuro: 1.0
+    };
+  }
+
+  return {
+    currencyCode: data.currency_code,
+    currencySymbol: data.currency_symbol,
+    exchangeRateToEuro: data.exchange_rate_to_euro
+  };
+};
 
 export const generateCustomFoodList = async (
   age: number,
@@ -600,28 +620,4 @@ export const generateCustomFoodList = async (
       currencyInfo: defaultCurrencyInfo
     };
   }
-};
-
-const getCurrencyInfo = async (region: string): Promise<CurrencyInfo> => {
-  const { data, error } = await supabase
-    .from('currency_by_region')
-    .select('currency_code, currency_symbol, exchange_rate_to_euro')
-    .eq('region', region)
-    .single();
-
-  if (error) {
-    console.error("Erreur lors de la récupération des informations de devise:", error);
-    // Valeurs par défaut pour l'euro
-    return {
-      currencyCode: 'EUR',
-      currencySymbol: '€',
-      exchangeRateToEuro: 1.0
-    };
-  }
-
-  return {
-    currencyCode: data.currency_code,
-    currencySymbol: data.currency_symbol,
-    exchangeRateToEuro: data.exchange_rate_to_euro
-  };
 };
