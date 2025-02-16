@@ -15,7 +15,6 @@ export type Database = {
           currency_code: string
           currency_symbol: string
           exchange_rate_to_euro: number
-          exchange_rates_updated_at: string | null
           id: string
           region: string
           updated_at: string
@@ -25,7 +24,6 @@ export type Database = {
           currency_code: string
           currency_symbol: string
           exchange_rate_to_euro: number
-          exchange_rates_updated_at?: string | null
           id?: string
           region: string
           updated_at?: string
@@ -35,7 +33,6 @@ export type Database = {
           currency_code?: string
           currency_symbol?: string
           exchange_rate_to_euro?: number
-          exchange_rates_updated_at?: string | null
           id?: string
           region?: string
           updated_at?: string
@@ -247,10 +244,6 @@ export type Database = {
           fat_per_100g: number
           region: string
         }[]
-      }
-      update_exchange_rates: {
-        Args: Record<PropertyKey, never>
-        Returns: undefined
       }
     }
     Enums: {
