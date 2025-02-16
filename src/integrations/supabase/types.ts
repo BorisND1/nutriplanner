@@ -183,6 +183,7 @@ export type Database = {
           notification_advance_minutes: number | null
           notification_enabled: boolean | null
           region: string | null
+          subscription_tier: Database["public"]["Enums"]["subscription_tier"]
         }
         Insert: {
           allergies?: string[] | null
@@ -194,6 +195,7 @@ export type Database = {
           notification_advance_minutes?: number | null
           notification_enabled?: boolean | null
           region?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
         }
         Update: {
           allergies?: string[] | null
@@ -205,6 +207,40 @@ export type Database = {
           notification_advance_minutes?: number | null
           notification_enabled?: boolean | null
           region?: string | null
+          subscription_tier?: Database["public"]["Enums"]["subscription_tier"]
+        }
+        Relationships: []
+      }
+      subscriptions: {
+        Row: {
+          canceled_at: string | null
+          created_at: string
+          ends_at: string | null
+          id: string
+          started_at: string
+          tier: Database["public"]["Enums"]["subscription_tier"]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          canceled_at?: string | null
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          started_at?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          canceled_at?: string | null
+          created_at?: string
+          ends_at?: string | null
+          id?: string
+          started_at?: string
+          tier?: Database["public"]["Enums"]["subscription_tier"]
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
@@ -248,13 +284,19 @@ export type Database = {
           region: string
         }[]
       }
+      is_premium_user: {
+        Args: {
+          user_uuid: string
+        }
+        Returns: boolean
+      }
       update_exchange_rates: {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
     }
     Enums: {
-      [_ in never]: never
+      subscription_tier: "free" | "premium"
     }
     CompositeTypes: {
       [_ in never]: never
