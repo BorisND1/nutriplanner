@@ -135,6 +135,7 @@ export type Database = {
           is_alternative: boolean | null
           meal_type: string
           original_meal_name: string
+          plan_tier: Database["public"]["Enums"]["subscription_tier"]
           scheduled_time: string
           user_id: string | null
         }
@@ -147,6 +148,7 @@ export type Database = {
           is_alternative?: boolean | null
           meal_type: string
           original_meal_name: string
+          plan_tier?: Database["public"]["Enums"]["subscription_tier"]
           scheduled_time: string
           user_id?: string | null
         }
@@ -159,6 +161,7 @@ export type Database = {
           is_alternative?: boolean | null
           meal_type?: string
           original_meal_name?: string
+          plan_tier?: Database["public"]["Enums"]["subscription_tier"]
           scheduled_time?: string
           user_id?: string | null
         }
