@@ -2,6 +2,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { AlertTriangle } from 'lucide-react';
 
 const Legal = () => {
   return (
@@ -29,6 +30,18 @@ const Legal = () => {
             viewport={{ once: true }}
             className="prose prose-lg mx-auto text-muted-foreground"
           >
+            <section className="bg-secondary/20 p-6 rounded-lg border-l-4 border-primary mb-8">
+              <div className="flex items-start gap-4">
+                <AlertTriangle className="w-6 h-6 text-primary flex-shrink-0 mt-1" />
+                <div>
+                  <h2 className="text-xl font-bold mb-2 text-foreground">Avis Important Concernant Votre Santé</h2>
+                  <p className="font-semibold">
+                    Les informations et recommandations fournies par FoodPlanner ne remplacent en aucun cas l'avis d'un professionnel de santé qualifié. Avant d'entreprendre tout changement significatif dans votre alimentation ou de suivre un programme nutritionnel, il est vivement recommandé de consulter votre médecin traitant, un nutritionniste ou un diététicien.
+                  </p>
+                </div>
+              </div>
+            </section>
+
             <section>
               <h2 className="text-2xl font-semibold mb-4 text-foreground">Éditeur du Site</h2>
               <p>
