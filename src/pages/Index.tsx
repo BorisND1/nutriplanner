@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
 import { ProfileForm } from '@/components/ProfileForm';
 import { NotificationPermission } from '@/components/NotificationPermission';
+import { Link } from 'react-router-dom';
 
 const Index = () => {
   return (
@@ -14,6 +15,7 @@ const Index = () => {
           <div className="flex justify-between h-16 items-center">
             <div className="flex-shrink-0 text-primary font-semibold">FoodPlanner</div>
             <div className="hidden md:flex space-x-8">
+              <Link to="/mission" className="text-foreground/80 hover:text-foreground transition-colors">Notre Mission</Link>
               <a href="#features" className="text-foreground/80 hover:text-foreground transition-colors">Fonctionnalités</a>
               <a href="#form" className="text-foreground/80 hover:text-foreground transition-colors">Programme</a>
               <a href="#profile" className="text-foreground/80 hover:text-foreground transition-colors">Profil</a>
