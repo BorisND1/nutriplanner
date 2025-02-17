@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Calendar, User, Bell, ListChecks } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -124,10 +123,45 @@ const Index = () => {
         </section>
       </main>
 
-      <footer className="bg-white border-t">
-        <div className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
-          <div className="text-center text-muted-foreground">
-            <p>&copy; 2024 FoodPlanner. Tous droits réservés.</p>
+      <footer className="bg-white border-t py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-lg font-semibold mb-4">FoodPlanner</h3>
+              <p className="text-sm text-muted-foreground">
+                Votre assistant personnel pour une alimentation saine et équilibrée.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Liens Rapides</h3>
+              <ul className="space-y-2">
+                <li>
+                  <Link to="/mission" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Notre Mission
+                  </Link>
+                </li>
+                <li>
+                  <a href="#features" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Fonctionnalités
+                  </a>
+                </li>
+                <li>
+                  <Link to="/legal" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+                    Mentions Légales
+                  </Link>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold mb-4">Contact</h3>
+              <p className="text-sm text-muted-foreground">
+                Email: contact@foodplanner.fr<br />
+                Suivez-nous sur les réseaux sociaux
+              </p>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
+            <p>&copy; {new Date().getFullYear()} FoodPlanner. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
