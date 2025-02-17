@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Calendar, User, Bell, ListChecks, Leaf } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -194,7 +195,7 @@ const Index = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Contact</h3>
               <p className="text-sm text-muted-foreground">
-                Email: contact@foodplanner.fr<br />
+                Email: contact@nutriplanner.fr<br />
                 Suivez-nous sur les réseaux sociaux
               </p>
             </div>
