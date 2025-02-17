@@ -29,7 +29,7 @@ const Index = () => {
       </nav>
 
       <main>
-        <section className="pt-32 pb-16 px-4 max-w-7xl mx-auto">
+        <section className="pt-32 pb-24 px-4 max-w-7xl mx-auto">
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -51,31 +51,6 @@ const Index = () => {
               </Button>
             </div>
           </motion.div>
-        </section>
-
-        <section className="py-16 bg-secondary/10">
-          <div className="max-w-4xl mx-auto px-4">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-              className="text-center"
-            >
-              <h2 className="text-3xl font-bold mb-6">Notre Mission</h2>
-              <div className="prose prose-lg mx-auto text-muted-foreground">
-                <p className="mb-4">
-                  Chez FoodPlanner, notre mission est de révolutionner la façon dont les gens planifient leurs repas quotidiens. Nous croyons que manger sainement ne devrait pas être compliqué ou coûteux.
-                </p>
-                <p className="mb-4">
-                  Notre application de planification de repas combine expertise nutritionnelle et technologie intelligente pour créer des menus personnalisés qui respectent vos préférences alimentaires, votre budget et vos objectifs de santé.
-                </p>
-                <p>
-                  Que vous cherchiez à perdre du poids, à gagner en muscle, à manger plus équilibré ou simplement à organiser vos repas de la semaine, FoodPlanner est l'outil qu'il vous faut pour une alimentation saine et équilibrée.
-                </p>
-              </div>
-            </motion.div>
-          </div>
         </section>
 
         <section id="features" className="py-24 bg-secondary/20">
