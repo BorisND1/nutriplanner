@@ -5,7 +5,7 @@
 
 @layer base {
   :root {
-    --background: 60 30% 98%;
+    --background: 40 33% 98%;
     --foreground: 20 40% 10%;
     
     --card: 0 0% 100%;
@@ -14,26 +14,26 @@
     --popover: 0 0% 100%;
     --popover-foreground: 20 40% 10%;
     
-    --primary: 158 23% 46%;
+    --primary: 142 37% 47%;
     --primary-foreground: 60 30% 98%;
     
-    --secondary: 20 30% 90%;
+    --secondary: 35 30% 96%;
     --secondary-foreground: 20 40% 10%;
     
-    --muted: 60 30% 96%;
+    --muted: 40 33% 96%;
     --muted-foreground: 20 40% 40%;
     
-    --accent: 12 60% 65%;
-    --accent-foreground: 60 30% 98%;
+    --accent: 25 95% 90%;
+    --accent-foreground: 20 40% 10%;
     
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 60 30% 98%;
     
     --border: 20 30% 90%;
     --input: 20 30% 90%;
-    --ring: 158 23% 46%;
+    --ring: 142 37% 47%;
     
-    --radius: 0.75rem;
+    --radius: 1rem;
   }
 
   * {
@@ -51,6 +51,12 @@
 
   .fade-in {
     animation: fade-in 0.4s ease-in-out;
+  }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
   }
 
   @keyframes slide-up {
