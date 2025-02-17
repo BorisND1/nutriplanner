@@ -5,32 +5,36 @@
 
 @layer base {
   :root {
-    --background: 60 30% 98%;
-    --foreground: 20 40% 10%;
+    /* Couleurs naturelles et apaisantes */
+    --background: 60 33% 98%;
+    --foreground: 24 12% 24%;
     
     --card: 0 0% 100%;
-    --card-foreground: 20 40% 10%;
+    --card-foreground: 24 12% 24%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 20 40% 10%;
+    --popover-foreground: 24 12% 24%;
     
+    /* Vert sauge apaisant */
     --primary: 158 23% 46%;
-    --primary-foreground: 60 30% 98%;
+    --primary-foreground: 60 33% 98%;
     
-    --secondary: 20 30% 90%;
-    --secondary-foreground: 20 40% 10%;
+    /* Beige clair */
+    --secondary: 40 33% 96%;
+    --secondary-foreground: 24 12% 24%;
     
-    --muted: 60 30% 96%;
-    --muted-foreground: 20 40% 40%;
+    --muted: 60 33% 96%;
+    --muted-foreground: 24 12% 48%;
     
+    /* Accent terracotta doux */
     --accent: 12 60% 65%;
-    --accent-foreground: 60 30% 98%;
+    --accent-foreground: 60 33% 98%;
     
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 60 30% 98%;
+    --destructive-foreground: 60 33% 98%;
     
-    --border: 20 30% 90%;
-    --input: 20 30% 90%;
+    --border: 20 33% 90%;
+    --input: 20 33% 90%;
     --ring: 158 23% 46%;
     
     --radius: 0.75rem;
