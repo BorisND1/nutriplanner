@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Calendar, User, Bell, ListChecks, Leaf } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,31 @@ import { Link } from 'react-router-dom';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background overflow-hidden">
+      <div className="fixed inset-0 -z-10">
+        <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full opacity-10">
+          <img 
+            src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9" 
+            alt="Fruits"
+            className="w-full h-full object-cover rounded-full"
+          />
+        </div>
+        <div className="absolute top-1/4 -right-16 w-48 h-48 rounded-full opacity-10">
+          <img 
+            src="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07" 
+            alt="Légumes"
+            className="w-full h-full object-cover rounded-full"
+          />
+        </div>
+        <div className="absolute bottom-1/4 -left-12 w-40 h-40 rounded-full opacity-10">
+          <img 
+            src="https://images.unsplash.com/photo-1501286353178-1ec881214838" 
+            alt="Noix"
+            className="w-full h-full object-cover rounded-full"
+          />
+        </div>
+      </div>
+
       <nav className="border-b bg-white/50 backdrop-blur-sm fixed w-full z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
@@ -33,12 +56,17 @@ const Index = () => {
       </nav>
 
       <main>
-        <section className="pt-32 pb-24 px-4 bg-gradient-to-b from-secondary/50 to-background">
+        <section className="pt-32 pb-24 px-4 bg-gradient-to-b from-secondary/50 to-background relative">
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] border border-primary/10 rounded-full" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] border border-primary/5 rounded-full" />
+          </div>
+
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="text-center max-w-3xl mx-auto"
+            className="text-center max-w-3xl mx-auto relative"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight text-foreground mb-6">
               Une alimentation saine et équilibrée
@@ -57,15 +85,16 @@ const Index = () => {
           </motion.div>
         </section>
 
-        <section id="features" className="py-24 px-4">
-          <div className="max-w-6xl mx-auto">
+        <section id="features" className="py-24 px-4 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-secondary/20 to-transparent opacity-50" />
+          <div className="max-w-6xl mx-auto relative">
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
-                className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
               >
                 <Calendar className="h-8 w-8 text-primary mb-6" />
                 <h3 className="text-lg font-semibold mb-3">Programme sur mesure</h3>
@@ -77,7 +106,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
               >
                 <User className="h-8 w-8 text-primary mb-6" />
                 <h3 className="text-lg font-semibold mb-3">Profil personnalisé</h3>
@@ -89,7 +118,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
               >
                 <Bell className="h-8 w-8 text-primary mb-6" />
                 <h3 className="text-lg font-semibold mb-3">Rappels personnalisés</h3>
@@ -101,7 +130,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="bg-white p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
               >
                 <ListChecks className="h-8 w-8 text-primary mb-6" />
                 <h3 className="text-lg font-semibold mb-3">Liste de courses</h3>
@@ -111,7 +140,7 @@ const Index = () => {
           </div>
         </section>
 
-        <section id="form" className="py-24 px-4 bg-secondary/20">
+        <section id="form" className="py-24 px-4 bg-secondary/20 relative">
           <div className="max-w-4xl mx-auto">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-bold tracking-tight text-foreground mb-4">
@@ -121,14 +150,14 @@ const Index = () => {
                 Commencez votre parcours vers une meilleure santé
               </p>
             </div>
-            <div className="bg-white p-8 rounded-2xl shadow-sm">
+            <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm relative">
               <ProfileForm />
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-white border-t py-12">
+      <footer className="bg-white/80 backdrop-blur-sm border-t py-12 relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>
