@@ -1,30 +1,32 @@
+
 import React from 'react';
 import { Calendar, User, Bell, ListChecks, Leaf } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { motion } from 'framer-motion';
 import { ProfileForm } from '@/components/ProfileForm';
 import { NotificationPermission } from '@/components/NotificationPermission';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Link } from 'react-router-dom';
 
 const Index = () => {
   return (
-    <div className="min-h-screen bg-background overflow-hidden">
+    <div className="min-h-screen bg-background overflow-hidden transition-colors">
       <div className="fixed inset-0 -z-10">
-        <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full opacity-10">
+        <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full opacity-10 dark:opacity-5">
           <img 
             src="https://images.unsplash.com/photo-1618160702438-9b02ab6515c9" 
             alt="Fruits"
             className="w-full h-full object-cover rounded-full"
           />
         </div>
-        <div className="absolute top-1/4 -right-16 w-48 h-48 rounded-full opacity-10">
+        <div className="absolute top-1/4 -right-16 w-48 h-48 rounded-full opacity-10 dark:opacity-5">
           <img 
             src="https://images.unsplash.com/photo-1465146344425-f00d5f5c8f07" 
             alt="Légumes"
             className="w-full h-full object-cover rounded-full"
           />
         </div>
-        <div className="absolute bottom-1/4 -left-12 w-40 h-40 rounded-full opacity-10">
+        <div className="absolute bottom-1/4 -left-12 w-40 h-40 rounded-full opacity-10 dark:opacity-5">
           <img 
             src="https://images.unsplash.com/photo-1501286353178-1ec881214838" 
             alt="Noix"
@@ -33,7 +35,7 @@ const Index = () => {
         </div>
       </div>
 
-      <nav className="border-b bg-white/50 backdrop-blur-sm fixed w-full z-50">
+      <nav className="border-b glass-light dark:glass-dark fixed w-full z-50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-2">
@@ -46,6 +48,7 @@ const Index = () => {
               <a href="#form" className="text-foreground/80 hover:text-foreground transition-colors">Programme</a>
             </div>
             <div className="flex items-center gap-4">
+              <ThemeToggle />
               <NotificationPermission />
               <Button variant="default" className="bg-primary hover:bg-primary/90 transition-colors">
                 Commencer
@@ -94,7 +97,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
                 viewport={{ once: true }}
-                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="glass-light dark:glass-dark p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
               >
                 <Calendar className="h-8 w-8 text-primary mb-6" />
                 <h3 className="text-lg font-semibold mb-3">Programme sur mesure</h3>
@@ -106,7 +109,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.1 }}
                 viewport={{ once: true }}
-                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="glass-light dark:glass-dark p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
               >
                 <User className="h-8 w-8 text-primary mb-6" />
                 <h3 className="text-lg font-semibold mb-3">Profil personnalisé</h3>
@@ -118,7 +121,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.2 }}
                 viewport={{ once: true }}
-                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="glass-light dark:glass-dark p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
               >
                 <Bell className="h-8 w-8 text-primary mb-6" />
                 <h3 className="text-lg font-semibold mb-3">Rappels personnalisés</h3>
@@ -130,7 +133,7 @@ const Index = () => {
                 whileInView={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
                 viewport={{ once: true }}
-                className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
+                className="glass-light dark:glass-dark p-8 rounded-2xl shadow-sm hover:shadow-md transition-shadow"
               >
                 <ListChecks className="h-8 w-8 text-primary mb-6" />
                 <h3 className="text-lg font-semibold mb-3">Liste de courses</h3>
@@ -150,14 +153,14 @@ const Index = () => {
                 Commencez votre parcours vers une meilleure santé
               </p>
             </div>
-            <div className="bg-white/80 backdrop-blur-sm p-8 rounded-2xl shadow-sm relative">
+            <div className="glass-light dark:glass-dark p-8 rounded-2xl shadow-sm relative">
               <ProfileForm />
             </div>
           </div>
         </section>
       </main>
 
-      <footer className="bg-white/80 backdrop-blur-sm border-t py-12 relative">
+      <footer className="glass-light dark:glass-dark border-t py-12 relative">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div>

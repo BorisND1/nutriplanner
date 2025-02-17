@@ -5,40 +5,49 @@
 
 @layer base {
   :root {
-    /* Couleurs naturelles et organiques */
+    /* Mode clair */
     --background: 40 30% 98%;
     --foreground: 20 25% 25%;
-    
     --card: 0 0% 100%;
     --card-foreground: 20 25% 25%;
-    
     --popover: 0 0% 100%;
     --popover-foreground: 20 25% 25%;
-    
-    /* Vert forêt */
     --primary: 145 45% 35%;
     --primary-foreground: 40 30% 98%;
-    
-    /* Beige doux */
     --secondary: 35 25% 95%;
     --secondary-foreground: 20 25% 25%;
-    
     --muted: 40 30% 96%;
     --muted-foreground: 20 25% 45%;
-    
-    /* Rouge fruits */
     --accent: 0 65% 65%;
     --accent-foreground: 40 30% 98%;
-    
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 40 30% 98%;
-    
-    /* Bordures et inputs en beige */
     --border: 35 25% 90%;
     --input: 35 25% 90%;
     --ring: 145 45% 35%;
-    
     --radius: 0.75rem;
+  }
+
+  .dark {
+    --background: 20 25% 8%;
+    --foreground: 40 30% 98%;
+    --card: 20 25% 10%;
+    --card-foreground: 40 30% 98%;
+    --popover: 20 25% 10%;
+    --popover-foreground: 40 30% 98%;
+    --primary: 145 45% 45%;
+    --primary-foreground: 40 30% 98%;
+    --secondary: 35 25% 15%;
+    --secondary-foreground: 40 30% 98%;
+    --muted: 40 30% 15%;
+    --muted-foreground: 40 30% 70%;
+    --accent: 0 65% 55%;
+    --accent-foreground: 40 30% 98%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 40 30% 98%;
+    --border: 35 25% 20%;
+    --input: 35 25% 20%;
+    --ring: 145 45% 45%;
   }
 
   * {
@@ -53,32 +62,14 @@
   h1, h2, h3, h4, h5, h6 {
     @apply font-playfair font-semibold;
   }
+}
 
-  .slide-up {
-    animation: slide-up 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+@layer utilities {
+  .glass-light {
+    @apply bg-white/80 backdrop-blur-sm;
   }
-
-  .fade-in {
-    animation: fade-in 0.4s ease-in-out;
-  }
-
-  @keyframes slide-up {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-    to {
-      transform: translateY(0);
-      opacity: 1;
-    }
-  }
-
-  @keyframes fade-in {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
+  
+  .glass-dark {
+    @apply bg-black/30 backdrop-blur-sm;
   }
 }
