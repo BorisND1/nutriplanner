@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Calendar, User, Bell, ListChecks, Leaf } from 'lucide-react';
 import { Button } from "@/components/ui/button";
@@ -40,7 +39,7 @@ const Index = () => {
           <div className="flex justify-between h-16 items-center">
             <div className="flex items-center gap-2">
               <Leaf className="h-6 w-6 text-primary" />
-              <span className="text-primary font-semibold tracking-wide">FoodPlanner</span>
+              <span className="text-primary font-semibold tracking-wide">NutriPlanner</span>
             </div>
             <div className="hidden md:flex space-x-8">
               <Link to="/mission" className="text-foreground/80 hover:text-foreground transition-colors">Notre Mission</Link>
@@ -166,7 +165,7 @@ const Index = () => {
             <div>
               <div className="flex items-center gap-2 mb-4">
                 <Leaf className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">FoodPlanner</h3>
+                <h3 className="text-lg font-semibold">NutriPlanner</h3>
               </div>
               <p className="text-sm text-muted-foreground">
                 Votre guide vers une alimentation saine et équilibrée.
@@ -201,7 +200,7 @@ const Index = () => {
             </div>
           </div>
           <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} FoodPlanner. Tous droits réservés.</p>
+            <p>&copy; {new Date().getFullYear()} NutriPlanner. Tous droits réservés.</p>
           </div>
         </div>
       </footer>
