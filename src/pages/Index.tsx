@@ -195,7 +195,7 @@ const Index = () => {
             <div>
               <h3 className="text-lg font-semibold mb-4">Contact</h3>
               <p className="text-sm text-muted-foreground">
-                Email: contact@nutriplanner.fr<br />
+                Email: contact@nutriplanner.net<br />
                 Suivez-nous sur les réseaux sociaux
               </p>
             </div>
